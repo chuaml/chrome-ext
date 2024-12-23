@@ -1,0 +1,16 @@
+:root {
+    background-color: #222;
+}
+
+body {
+    filter: invert(.9) hue-rotate(180deg) saturate(1.5) brightness(1.1);
+    background-color: #ddd;
+}
+
+img[src],
+video[src],
+[class*="img"],
+[class*="image"] {
+    filter: invert(1) hue-rotate(180deg);
+}
+

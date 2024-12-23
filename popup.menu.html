@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Extension</title>
+    <style>
+        :root {
+            background-color: #333;
+            color: #eee;
+        }
+
+        body {
+            background-color: #222;
+            color: #eee;
+            padding: 1rem;
+            min-width: 10rem;
+            min-height: 10rem;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                background-color: unset;
+                color: unset;
+            }
+
+            body {
+                background-color: unset;
+                color: unset;
+            }
+        }
+
+        label:has(>input[type=checkbox]:not(:disabled)) {
+            cursor: pointer;
+            &> input {
+                cursor: pointer;
+                vertical-align: text-bottom;
+                margin: 0;
+            }
+            &:active,&>input:active {
+                cursor: default;
+            }
+            &:focus-within:hover {
+                outline: 1px solid #aaa;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div>
+            <label>
+                <input type="checkbox" id="chkDarkMode">
+                <span>Dark Mode:</span>
+            </label>
+        </div>
+    </div>
+    <script src="popup.menu.js"></script>
+</body>
+
+</html>

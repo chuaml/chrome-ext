@@ -1,0 +1,55 @@
+{
+    "name": "custom ext",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {},
+    "action": {
+        "default_popup": "popup.menu.html"
+    },
+    "permissions": [
+        "storage",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://idx.dev/*"
+            ],
+            "exclude_matches": [
+                "https://*.google.com/*",
+                "https://vscode.dev/*",
+                "https://idx.dev/*",
+                "https://idx.google.com/*",
+                "https://github.dev/*",
+                "https://github.com/*",
+                "https://www.youtube.com/*"
+            ],
+            "run_at": "document_start",
+            "css": [
+                "darkmode/darkmode.css"
+            ]
+        },
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "exclude_matches": [
+                "https://mail.google.com/*",
+                "https://vscode.dev/*",
+                "https://idx.dev/*",
+                "https://idx.google.com/*",
+                "https://github.dev/*"
+            ],
+            "run_at": "document_start",
+            "js": [
+                "anti-tracker/gtag-denied.js",
+                "anti-tracker/referrer-policy.js"
+            ],
+            "world": "MAIN"
+        }
+    ]
+}
