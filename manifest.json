@@ -42,7 +42,8 @@
                 "https://vscode.dev/*",
                 "https://idx.dev/*",
                 "https://idx.google.com/*",
-                "https://github.dev/*"
+                "https://github.dev/*",
+                "https://github.com/*"
             ],
             "run_at": "document_start",
             "js": [
