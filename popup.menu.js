@@ -29,33 +29,42 @@ function init_toggleOptions(inputElement) {
 
 { // dynamic content_script options
 
-    { // init dynamic content_script options
-        const chkDarkMode = document.getElementById('chkDarkMode');
-        chkDarkMode.addEventListener('change', function (e) {
-            if (e.target.checked === true) {
-                registerContentScript(e.target.id);
-            }
-            else {
-                unregisterContentScript(e.target.id);
+    (async _ => { // init dynamic content_script options
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        const currentOrigin = new URL(tabs[0].url).origin;
+
+        // restore element state
+        chrome.scripting.getRegisteredContentScripts((content_scripts) => {
+            const len = content_scripts.length;
+            console.log(`Registered Content Scripts (n = ${len}): `, content_scripts);
+            for (let i = 0; i < len; i++) {
+                const row = content_scripts[i].id.split("\t");
+                if (row[0] !== currentOrigin) continue;
+
+                const inputElement = document.getElementById(row[1]);
+                if (inputElement === null) continue;
+                inputElement.checked = true;
             }
         });
-    }
-    // restore element state
-    chrome.scripting.getRegisteredContentScripts((content_scripts) => {
-        const len = content_scripts.length;
-        console.log(`Registered Content Scripts (n = ${len}): `, content_scripts);
-        for (let i = 0; i < len; i++) {
-            const inputElement = document.getElementById(content_scripts[i].id);
-            if (inputElement === null) continue;
-            inputElement.checked = true;
-        }
-    });
 
-    async function registerContentScript(id) {
+        const chkDarkMode = document.getElementById('chkDarkMode');
+        chkDarkMode.addEventListener('change', async function (e) {
+            const id = currentOrigin + "\t" + e.target.id;
+            if (e.target.checked === true) {
+                registerContentScript(id, [currentOrigin + '/*']);
+            }
+            else {
+                unregisterContentScript(id, [currentOrigin + '/*']);
+            }
+        });
+
+    })();
+
+    async function registerContentScript(id, url_patterns) {
         await chrome.scripting.registerContentScripts([
             {
                 id: id, // Unique ID for the content script
-                matches: ["<all_urls>"],
+                matches: url_patterns,
                 js: undefined,
                 css: ["/darkmode/darkmode.css"],
                 runAt: 'document_start',
