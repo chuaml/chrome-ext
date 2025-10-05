@@ -2,7 +2,9 @@
     "name": "custom ext",
     "version": "1.0",
     "manifest_version": 3,
-    "background": {},
+    "background": {
+        "service_worker": "sw.js"
+    },
     "action": {
         "default_popup": "popup.menu.html"
     },
@@ -13,7 +15,32 @@
     "host_permissions": [
         "<all_urls>"
     ],
+    "web_accessible_resources": [
+        {
+            "matches": [
+                "https://*/*",
+                "http://*/*"
+            ],
+            "resources": [
+                "/public/*",
+                "/public/*.mjs",
+                "/public/*.js",
+                "/public/*.css",
+                "/public/*.html"
+            ]
+        }
+    ],
     "content_scripts": [
+        {
+            "matches": [
+                "https://*/*",
+                "http://*/*"
+            ],
+            "run_at": "document_start",
+            "js": [
+                "main.js"
+            ]
+        },
         {
             "matches": [
                 "https://idx.dev/*"
