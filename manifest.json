@@ -1,16 +1,20 @@
 {
     "name": "custom ext",
-    "version": "1.0",
+    "version": "2.0",
     "manifest_version": 3,
     "background": {
-        "service_worker": "sw.js"
+        "service_worker": "src/background/background.js"
+    },
+    "side_panel": {
+        "default_path": "sidepanel.html"
     },
     "action": {
         "default_popup": "popup.menu.html"
     },
     "permissions": [
         "storage",
-        "scripting"
+        "scripting",
+        "activeTab"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -39,6 +43,16 @@
             "run_at": "document_start",
             "js": [
                 "main.js"
+            ]
+        },
+         {
+            "matches": [
+                "https://*/*",
+                "http://*/*"
+            ],
+            "run_at": "document_start",
+            "js": [
+                "src/scripting/injectCss.js"
             ]
         },
         {

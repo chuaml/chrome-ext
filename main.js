@@ -36,12 +36,12 @@ async function importModule(filename, options) {
 
 // main entry point
 (async function init() {
-    const module = await importModule('code.mjs');
-    console.warn({ module });
-    module.haha();
+    // const module = await importModule('code.mjs');
+    // console.log({ module });
+    // module.haha();
 
 
-    // module to load...
+    // module to load and run in MAIN world...
 
 
 })();

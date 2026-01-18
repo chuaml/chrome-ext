@@ -45,6 +45,14 @@
                 outline: 1px solid #aaa;
             }
         }
+        #txtCssCode{
+            min-height: 20rem;
+            cursor: text;
+            border: 1px solid #eee;
+            padding: .5rem;
+            /* font-family: 'Courier New', Courier, monospace; */
+            font-size: .7rem;
+        }
     </style>
 </head>
 
@@ -55,8 +63,33 @@
                 <input type="checkbox" id="chkDarkMode">
                 <span>Dark Mode:</span>
             </label>
+
+            <div id="txtCssCode" contenteditable="plaintext-only" spellcheck="false"></div>
         </div>
     </div>
+    <textarea readonly>
+html,
+body {
+    background-color: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    body {
+        background-color: unset;
+    }
+
+    html {
+        filter: invert(.9) hue-rotate(180deg) brightness(1.1) saturate(1);
+        background-color: #eee;
+    }
+
+    img,
+    iframe {
+        filter: invert(1) hue-rotate(180deg) brightness(1) saturate(1);
+    }
+}
+    </textarea>
     <script src="popup.menu.js"></script>
 </body>
 

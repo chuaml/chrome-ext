@@ -1,0 +1,21 @@
+html,
+body {
+    background-color: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    body {
+        background-color: unset;
+    }
+
+    html {
+        filter: invert(.9) hue-rotate(180deg) brightness(1.1) saturate(1);
+        background-color: #eee;
+    }
+
+    img,
+    iframe {
+        filter: invert(1) hue-rotate(180deg) brightness(1) saturate(1);
+    }
+}
