@@ -1,0 +1,23 @@
+FROM node:24.13-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy package files first to leverage Docker cache
+COPY package.json package-lock.json  ./
+
+# Install dependencies
+RUN npm install --timing
+
+# USER node
+
+# Copy the rest of your application code
+COPY . .
+
+# fyi only, vite use 5173
+EXPOSE 5173
+
+# CMD ["npm", "run", "test"]
+# CMD ["sh"]
+
+ENTRYPOINT [ "sh" ]

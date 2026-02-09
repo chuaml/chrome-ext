@@ -1,0 +1,13 @@
+services:
+  app:  #  docker compose down --remove-orphans && docker compose run --rm --build app
+    # image: xxxx   # custom image
+    build: .   # current dir as project name & image tag
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/app
+      - dependencies:/app/node_modules # isloate node_modules/ from host, stay in container volume
+
+volumes:
+  dependencies: # for container's node_modules/
