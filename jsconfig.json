@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "es2022",
+        "target": "es2024",
+        "moduleResolution": "bundler",
+        "baseUrl": "./",
+        "paths": {
+            "/src/*": [
+                "./src/*"
+            ],
+             "/node_modules/*": [
+                "./node_modules/*"
+            ],
+        },
+        // "checkJs": true
+    },
+    "include": [
+        "./src/**/*.js",
+        "./src/**/*.mjs",
+    ],
+    "exclude": [
+        "./node_modules/",
+        "./**/*.md"
+    ],
+}

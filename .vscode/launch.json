@@ -1,17 +1,36 @@
 {
     "version": "0.2.0",
     "configurations": [
-        {    // is to launch a new chrome instance with a separated user profile, load current src as extension, then debug it
+        {
+            "name": "debug file",
+            "type": "node",
+            "cwd": "${workspaceFolder}",
+            // "console": "integratedTerminal", // orignal terminal with plain-text output
+            "console": "internalConsole", // use orignal terminal
+            "request": "launch",
+            "program": "${file}",
+            "runtimeArgs": [
+                "--inspect-brk",
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "runtimeExecutable": "node",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        { // is to launch a new chrome instance with a separated user profile, load current src as extension, then debug it
             "name": "debug chrome extension",
             "type": "chrome",
             "request": "launch",
             "url": "chrome://extensions/",
             "runtimeArgs": [
-                "--disable-features=DisableLoadExtensionCommandLineSwitch",    // turn off security feature for v137^
-                "--load-extension=${workspaceFolder}",    // current project dir; do not quote "" the path
-                "--user-data-dir=${workspaceFolder}/.temp",    // recommend, to clean up this profile data later
-                "--profile-directory=kltag",    // optional profile name
-                "--no-first-run"    // skip welcome page
+                "--disable-features=DisableLoadExtensionCommandLineSwitch", // turn off security feature for v137^
+                "--load-extension=${workspaceFolder}", // current project dir; do not quote "" the path
+                "--user-data-dir=${workspaceFolder}/.temp", // recommend, to clean up this profile data later
+                "--profile-directory=kltag", // optional profile name
+                "--no-first-run" // skip welcome page
             ],
         },
     ]

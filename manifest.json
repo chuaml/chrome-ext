@@ -3,18 +3,20 @@
     "version": "2.0",
     "manifest_version": 3,
     "background": {
-        "service_worker": "src/background/background.js"
+        "service_worker": "src/background/background.js",
+        "type": "module"
     },
     "side_panel": {
         "default_path": "sidepanel.html"
     },
     "action": {
-        "default_popup": "popup.menu.html"
     },
     "permissions": [
         "storage",
         "scripting",
-        "activeTab"
+        "activeTab",
+        "debugger",
+        "tabs"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -45,7 +47,7 @@
                 "main.js"
             ]
         },
-         {
+        {
             "matches": [
                 "https://*/*",
                 "http://*/*"
@@ -75,8 +77,8 @@
         },
         {
             "matches": [
-                "http://*/*",
-                "https://*/*"
+                "http://x/*",
+                "https://x/*"
             ],
             "exclude_matches": [
                 "https://mail.google.com/*",
@@ -97,6 +99,21 @@
                 "anti-tracker/referrer-policy.js"
             ],
             "world": "MAIN"
+        },
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "exclude_matches": [
+                "https://xxxxxxxxxxxxxx.google.com/*"
+  
+            ],
+            "run_at": "document_start",
+            "js": [
+                "src/scripting/cdp.debugger.js"
+            ],
+            "world": "ISOLATED"
         }
     ]
 }

@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json  ./
 
 # Install dependencies
-RUN npm install --timing
+RUN npm install
 
 # USER node
 

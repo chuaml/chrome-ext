@@ -4,7 +4,7 @@
   "description": "custom ext",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,5 +13,8 @@
     "@types/chrome": "^0.1.34",
     "eslint": "^9.39.2",
     "globals": "^17.0.0"
+  },
+  "dependencies": {
+    "ec4w_validator": "^0.0.1001111224"
   }
 }
