@@ -8,7 +8,7 @@
             "/src/*": [
                 "./src/*"
             ],
-             "/node_modules/*": [
+             "@/node_modules/*": [
                 "./node_modules/*"
             ],
         },
@@ -19,7 +19,7 @@
         "./src/**/*.mjs",
     ],
     "exclude": [
-        "./node_modules/",
+        "./node_modules",
         "./**/*.md"
     ],
 }

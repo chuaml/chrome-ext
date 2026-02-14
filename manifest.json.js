@@ -1,4 +1,4 @@
-{
+export default {
     "name": "custom ext",
     "version": "2.0",
     "manifest_version": 3,
@@ -10,6 +10,7 @@
         "default_path": "sidepanel.html"
     },
     "action": {
+        "default_popup": "./popup.menu.html"
     },
     "permissions": [
         "storage",
@@ -44,7 +45,7 @@
             ],
             "run_at": "document_start",
             "js": [
-                "main.js"
+                "./src/main.js"
             ]
         },
         {
@@ -54,7 +55,7 @@
             ],
             "run_at": "document_start",
             "js": [
-                "src/scripting/injectCss.js"
+                "./src/scripting/injectCss.js"
             ]
         },
         {
@@ -71,8 +72,8 @@
                 "https://www.youtube.com/*"
             ],
             "run_at": "document_start",
-            "css": [
-                "darkmode/darkmode.css"
+            "js": [
+                "./src/darkmode/_.js"
             ]
         },
         {
@@ -95,8 +96,8 @@
             ],
             "run_at": "document_start",
             "js": [
-                "anti-tracker/gtag-denied.js",
-                "anti-tracker/referrer-policy.js"
+                "./src/anti-tracker/gtag-denied.js",
+                "./src/anti-tracker/referrer-policy.js"
             ],
             "world": "MAIN"
         },
@@ -107,11 +108,10 @@
             ],
             "exclude_matches": [
                 "https://xxxxxxxxxxxxxx.google.com/*"
-  
             ],
             "run_at": "document_start",
             "js": [
-                "src/scripting/cdp.debugger.js"
+                "./src/scripting/cdp.debugger.js"
             ],
             "world": "ISOLATED"
         }
