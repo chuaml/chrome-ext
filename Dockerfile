@@ -20,4 +20,5 @@ EXPOSE 5173
 # CMD ["npm", "run", "test"]
 # CMD ["sh"]
 
-ENTRYPOINT [ "sh" ]
+# CMD ["sleep", "infinity"]
+# ENTRYPOINT [ "sh" ] # "ENTRYPOINT" is not compatible with vscode devcontainer

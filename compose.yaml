@@ -9,5 +9,6 @@ services:
       - ./:/app
       - dependencies:/app/node_modules # isloate node_modules/ from host, stay in container volume
 
+
 volumes:
   dependencies: # for container's node_modules/
