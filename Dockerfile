@@ -1,4 +1,6 @@
-FROM node:24.13-alpine
+# this is for production, lack basic tools, not suitable for development-only purpose
+FROM node:24.13-alpine  
+
 
 # Set the working directory inside the container
 WORKDIR /app
