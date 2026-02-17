@@ -1,14 +1,26 @@
 services:
-  app:  #  docker compose down --remove-orphans && docker compose run --rm --build app
-    # image: xxxx   # custom image
-    build: .   # current dir as project name & image tag
-    working_dir: /app
+  # app:  #  docker compose down --remove-orphans && docker compose run --rm --build app
+  #   # image: xxxx   # custom image
+  #   build: .   # current dir as project name & image tag
+  #   working_dir: /app
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./:/app
+  #     - dependencies:/app/node_modules # isloate node_modules/ from host, stay in container volume
+
+  dev-container: ## for vscode dev container extension
+    image: mcr.microsoft.com/devcontainers/javascript-node:24
+    working_dir: /app/
     ports:
       - "5173:5173"
     volumes:
-      - ./:/app
+      - ./:/app:cached
+      - ./dist/:/app/dist:delegated
       - dependencies:/app/node_modules # isloate node_modules/ from host, stay in container volume
 
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
 
 volumes:
   dependencies: # for container's node_modules/
