@@ -17,7 +17,8 @@ export default {
         "scripting",
         "activeTab",
         "debugger",
-        "tabs"
+        "tabs",
+        "sidePanel"
     ],
     "host_permissions": [
         "<all_urls>"

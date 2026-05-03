@@ -1,36 +1,31 @@
 {
-    window.dataLayer = [];
-    const GTAG = function () { window.dataLayer.push(arguments); };
-    const option = {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-    };
+    chrome.storage.local.get(['gtag_enabled'], (res) => {
+        if (res.gtag_enabled === false) return;
 
-    GTAG('consent', 'default', option);
-    GTAG('consent', 'update', option);
+        window.dataLayer = [];
+        const GTAG = function () { window.dataLayer.push(arguments); };
+        const option = {
+            analytics_storage: 'denied',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+        };
 
-    document.addEventListener('readystatechange', ev => {
-        setTimeout(_ => {
+        GTAG('consent', 'default', option);
+        GTAG('consent', 'update', option);
+
+        const updateConsent = () => {
             if (window.gtag && typeof (window.gtag) === 'function') {
-                setTimeout(_ => {
-                    window.gtag('consent', 'update', option);
-                }, 500);
                 window.gtag('consent', 'default', option);
                 window.gtag('consent', 'update', option);
             }
-        }, 0);
-    });
-    document.addEventListener('load', ev => {
-        setTimeout(_ => {
-            if (window.gtag && typeof (window.gtag) === 'function') {
-                setTimeout(_ => {
-                    window.gtag('consent', 'update', option);
-                }, 500);
-                window.gtag('consent', 'default', option);
-                window.gtag('consent', 'update', option);
-            }
-        }, 100);
+        };
+
+        document.addEventListener('readystatechange', () => {
+            setTimeout(updateConsent, 0);
+        });
+        document.addEventListener('load', () => {
+            setTimeout(updateConsent, 100);
+        });
     });
 };

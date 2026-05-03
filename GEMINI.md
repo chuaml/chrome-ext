@@ -12,13 +12,19 @@ This project is a custom Chrome Extension built with Vite and the `@crxjs/vite-p
 ## Key Components
 - **Background Service Worker:** `src/background/background.js` (Module type).
 - **Popup UI:** `popup.menu.html` and `popup.menu.js`.
-- **Side Panel:** `sidepanel.html`.
+- **Side Panel:** `sidepanel.html` and `src/sidepanel.js` (Custom CSS Injector UI).
 - **Content Scripts:**
     - `src/main.js`: Primary content script.
-    - `src/scripting/injectCss.js`: CSS injection logic.
+    - `src/scripting/injectCss.js`: CSS injection logic (Triggers injection on load).
     - `src/darkmode/_.js`: Dark mode implementation (specifically for `idx.dev`).
     - `src/anti-tracker/`: Tracker blocking logic (`gtag-denied.js`, `referrer-policy.js`).
     - `src/scripting/cdp.debugger.js`: Debugger integration.
+
+## Custom CSS Injector
+The extension includes a feature to inject custom CSS into the active tab from the side panel.
+- **UI:** Located in the side panel (`sidepanel.html`).
+- **Mechanism:** Uses `chrome.scripting.insertCSS` via the background script for safe and reliable injection.
+- **Persistence:** CSS code is saved to `chrome.storage.local`.
 
 ## Permissions
 The extension requests the following permissions:

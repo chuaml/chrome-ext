@@ -2,35 +2,72 @@ import { EC4W_Request, EC4W_Result, EC4W_Validator, SentRequest } from "ec4w_val
 
 chrome.runtime.onInstalled.addListener(function () {
 	chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/popup.menu.html` });
+
+	// Set side panel to open on action click
+	chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+		.catch((error) => console.error(error));
 });
 
 
 
 
 // action: 'insertCss'
-// permissions: activeTab
+// permissions: activeTab, scripting, storage
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (sender.id !== chrome.runtime.id) return;
-	if (message.action !== 'insertCss') return;
-	(async function insertCss() {
-		const storage = await chrome.storage.local.get(['cssCode']);
-		if (!storage['cssCode']) return;
+    if (sender.id !== chrome.runtime.id) return;
+    if (message.action !== 'insertCss') return;
 
-		const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-		if (!tab) return;
-		if (!tab.url) return; // not in webpage, e.g. in chrome://ext page
-		if (tab.url.startsWith('http') === false) return;
-		console.log({ tab }, tab.url);
-		await chrome.scripting.insertCSS({
-			target: { tabId: tab.id },
-			css: storage['cssCode']
-		});
-	})().finally(sendResponse);
+    (async function insertCss() {
+        try {
+            const settings = await chrome.storage.local.get(['injector_enabled']);
+            if (settings.injector_enabled === false) {
+                console.log('CSS Injection is globally disabled.');
+                return;
+            }
 
-	// Return true if you want to use sendResponse asynchronously
-	return true;
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (!tab || !tab.id) {
+                throw new Error('No active tab found.');
+            }
+
+            if (!tab.url || !tab.url.startsWith('http')) {
+                throw new Error('Cannot inject CSS into non-web pages.');
+            }
+
+            let storageKey;
+            if (message.scope === 'global') {
+                storageKey = 'css_global';
+            } else {
+                const url = new URL(tab.url);
+                const domain = message.domain || url.hostname;
+                storageKey = `css_${domain}`;
+            }
+
+            const storage = await chrome.storage.local.get([storageKey]);
+            const cssCode = storage[storageKey];
+
+            if (!cssCode) {
+                console.warn(`No CSS code found for scope ${message.scope} (${storageKey})`);
+                return;
+            }
+
+            console.log(`Injecting CSS into tab ${tab.id} using scope ${message.scope}`);
+
+            await chrome.scripting.insertCSS({
+                target: { tabId: tab.id },
+                css: cssCode
+            });
+
+            console.log('CSS injected successfully.');
+        } catch (error) {
+            console.error('Failed to inject CSS:', error);
+            throw error;
+        }
+    })().then(() => sendResponse({ success: true }))
+       .catch((err) => sendResponse({ success: false, error: err.message }));
+
+    return true; // Keep message channel open for async response
 });
-
 
 
 
@@ -155,9 +192,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		}
 	}
 
-	chrome.action.onClicked.addListener((tab) => {
-		startDebugging(tab.id);
-	});
+	// chrome.action.onClicked.addListener((tab) => {
+	// 	startDebugging(tab.id);
+	// });
 
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (sender.id !== chrome.runtime.id) return false;
