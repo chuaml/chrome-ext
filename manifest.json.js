@@ -9,6 +9,7 @@ export default {
     "side_panel": {
         "default_path": "sidepanel.html"
     },
+    "options_page": "options.html",
     "action": {
         "default_popup": "./popup.menu.html"
     },

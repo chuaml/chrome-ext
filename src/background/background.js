@@ -1,7 +1,7 @@
 import { EC4W_Request, EC4W_Result, EC4W_Validator, SentRequest } from "ec4w_validator";
 
 chrome.runtime.onInstalled.addListener(function () {
-	chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/popup.menu.html` });
+	chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/options.html` });
 
 	// Set side panel to open on action click
 	chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })

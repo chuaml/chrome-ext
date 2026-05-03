@@ -12,6 +12,11 @@
         await chrome.storage.local.set({ cssCode: e.target.textContent });
     });
 
+    document.getElementById('open-settings').addEventListener('click', (e) => {
+        e.preventDefault();
+        chrome.runtime.openOptionsPage();
+    });
+
     chrome.runtime.sendMessage({
         action: "insertCss",
         // cssCode: storage['cssCode']

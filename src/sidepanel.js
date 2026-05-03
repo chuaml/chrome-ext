@@ -11,6 +11,8 @@ const toggleGtag = document.getElementById('toggle-gtag');
 const toggleReferrer = document.getElementById('toggle-referrer');
 const savedScopesList = document.getElementById('saved-scopes-list');
 
+const openSettingsBtn = document.getElementById('open-settings');
+
 let currentTabDomain = '';
 let isUpdatingFromStorage = false;
 
@@ -218,6 +220,10 @@ scopeGlobal.addEventListener('change', async () => {
 
 masterToggle.addEventListener('change', async () => {
     await chrome.storage.local.set({ injector_enabled: masterToggle.checked });
+});
+
+openSettingsBtn.addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
 });
 
 injectBtn.addEventListener('click', async () => {
