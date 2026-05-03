@@ -94,15 +94,22 @@ function updateGlobalState(storage) {
     const session = storage.ui_session || {};
     const enabled = storage.injector_enabled !== false;
     
-    const info = document.createElement('div');
-    info.style.lineHeight = '1.6';
-    info.innerHTML = `
-        <div><strong>Injector Enabled:</strong> ${enabled ? '✅ Yes' : '❌ No'}</div>
-        <div><strong>Current UI Scope:</strong> ${session.scope || 'N/A'}</div>
-        <div><strong>Current UI Mode:</strong> ${session.mode || 'N/A'}</div>
-        <div><strong>Current UI Target:</strong> ${session.target || 'N/A'}</div>
-    `;
-    content.appendChild(info);
+    const items = [
+        { label: 'Injector Enabled', value: enabled ? '✅ Active' : '❌ Disabled' },
+        { label: 'UI Scope', value: session.scope || 'None' },
+        { label: 'UI Mode', value: session.mode || 'None' },
+        { label: 'UI Target', value: session.target || 'None' }
+    ];
+
+    items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'state-item';
+        div.innerHTML = `
+            <div class="state-label">${item.label}</div>
+            <div class="state-value">${item.value}</div>
+        `;
+        content.appendChild(div);
+    });
 }
 
 function openEditModal(key, value) {

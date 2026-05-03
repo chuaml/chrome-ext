@@ -7,11 +7,35 @@
     <style>
         :root {
             --primary-color: #4285f4;
+            --primary-hover: #357abd;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --border-color: #e0e0e0;
-            --danger-color: #dc3545;
+            --text-color: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --danger-color: #d93025;
+            --success-color: #1e8e3e;
+            --input-bg: #ffffff;
+            --table-header: #f1f3f4;
+            --shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+            --transition: all 0.2s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #8ab4f8;
+                --primary-hover: #aecbfa;
+                --bg-color: #202124;
+                --card-bg: #292a2d;
+                --text-color: #e8eaed;
+                --text-secondary: #9aa0a6;
+                --border-color: #3c4043;
+                --danger-color: #f28b82;
+                --success-color: #81c995;
+                --input-bg: #303134;
+                --table-header: #3c4043;
+                --shadow: 0 1px 3px 0 rgba(0,0,0,.3), 0 4px 8px 3px rgba(0,0,0,.15);
+            }
         }
 
         body {
@@ -19,11 +43,13 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 24px;
+            line-height: 1.5;
+            transition: background-color 0.3s ease;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -31,49 +57,74 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        h1 { margin: 0; color: var(--primary-color); }
+        h1 { 
+            margin: 0; 
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: var(--primary-color); 
+        }
 
         .toolbar {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+            align-items: center;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 24px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            margin-bottom: 24px;
         }
 
         .section-title {
             font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.9rem;
         }
 
-        th, td {
+        th {
             text-align: left;
-            padding: 12px;
+            padding: 14px;
+            background: var(--table-header);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 14px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        th { background: #f1f3f4; font-weight: 600; }
-
-        tr:hover { background: #fcfcfc; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: rgba(0,0,0,0.02); }
 
         .actions-cell {
             display: flex;
@@ -81,102 +132,164 @@
         }
 
         button {
-            padding: 8px 12px;
+            padding: 8px 16px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
             border: 1px solid var(--border-color);
-            background: white;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
         }
 
-        button:hover { background: #f1f3f4; }
+        button:hover { 
+            background: var(--bg-color);
+            border-color: var(--text-secondary);
+        }
 
         button.primary {
             background: var(--primary-color);
-            color: white;
+            color: var(--bg-color);
             border-color: var(--primary-color);
         }
 
-        button.primary:hover { background: #357abd; }
+        button.primary:hover { 
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
 
         button.danger {
             color: var(--danger-color);
-            border-color: var(--danger-color);
         }
 
-        button.danger:hover { background: #fff5f5; }
+        button.danger:hover { 
+            background: rgba(217, 48, 37, 0.1);
+            border-color: var(--danger-color);
+        }
 
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            width: 80%;
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 16px;
+            width: 90%;
             max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .close-modal {
             cursor: pointer;
             font-size: 1.5rem;
-            font-weight: bold;
+            color: var(--text-secondary);
+            transition: var(--transition);
         }
+
+        .close-modal:hover { color: var(--text-color); }
 
         textarea {
             width: 100%;
             height: 400px;
-            font-family: monospace;
-            padding: 10px;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            padding: 16px;
             box-sizing: border-box;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
         }
 
         .search-box {
-            padding: 8px 12px;
+            padding: 10px 16px;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
-            width: 250px;
+            border-radius: 8px;
+            width: 300px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
         }
 
         .badge {
             display: inline-block;
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: #e8f0fe;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: var(--badge-bg);
             color: var(--primary-color);
-            margin-right: 5px;
+            text-transform: uppercase;
         }
 
         pre {
             margin: 0;
-            font-size: 0.85rem;
-            max-width: 300px;
+            font-size: 0.8rem;
+            max-width: 400px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: var(--text-secondary);
+            font-family: monospace;
         }
+
+        #global-state-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .state-item {
+            padding: 16px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .state-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .state-value {
+            font-weight: 500;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
     </style>
 </head>
 <body>
@@ -184,15 +297,22 @@
         <header>
             <h1>Advanced Settings</h1>
             <div class="actions-cell">
-                <button id="btn-export">Export Config (JSON)</button>
+                <button id="btn-export">Export Config</button>
                 <button id="btn-import">Import Config</button>
-                <button id="btn-reset" class="danger">Reset All Settings</button>
+                <button id="btn-reset" class="danger">Reset All</button>
             </div>
         </header>
 
         <div class="toolbar">
-            <input type="text" id="search-input" class="search-box" placeholder="Search by domain or key...">
+            <input type="text" id="search-input" class="search-box" placeholder="Search domains or keys...">
             <button id="btn-refresh">Refresh</button>
+        </div>
+
+        <div class="card" id="global-sessions-card">
+            <div class="section-title">Global State</div>
+            <div id="global-state-content">
+                <!-- UI Session and other global flags -->
+            </div>
         </div>
 
         <div class="card">
@@ -211,13 +331,6 @@
                 </tbody>
             </table>
         </div>
-
-        <div class="card" id="global-sessions-card">
-            <div class="section-title">Global State & Sessions</div>
-            <div id="global-state-content">
-                <!-- UI Session and other global flags -->
-            </div>
-        </div>
     </div>
 
     <!-- Edit Modal -->
@@ -228,8 +341,8 @@
                 <span class="close-modal" id="close-modal">&times;</span>
             </div>
             <div id="edit-container">
-                <textarea id="edit-area"></textarea>
-                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                <textarea id="edit-area" spellcheck="false"></textarea>
+                <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
                     <button id="btn-cancel-edit">Cancel</button>
                     <button id="btn-save-edit" class="primary">Save Changes</button>
                 </div>
@@ -244,9 +357,9 @@
                 <h2>Import Configuration</h2>
                 <span class="close-modal" id="close-import">&times;</span>
             </div>
-            <p>Paste JSON configuration below. This will overwrite existing settings!</p>
-            <textarea id="import-area" placeholder='{ "css_google.com": "...", ... }'></textarea>
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Paste JSON configuration below. <strong style="color: var(--danger-color);">This will overwrite all current settings!</strong></p>
+            <textarea id="import-area" placeholder='{ "css_google.com": "...", ... }' spellcheck="false"></textarea>
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
                 <button id="btn-cancel-import">Cancel</button>
                 <button id="btn-confirm-import" class="primary">Confirm Import</button>
             </div>

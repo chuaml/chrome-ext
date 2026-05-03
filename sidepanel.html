@@ -6,18 +6,45 @@
     <title>CSS Injector</title>
     <style>
         :root {
+            color-scheme: light dark;
             --primary-color: #4285f4;
             --primary-hover: #357abd;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --text-secondary: #666;
-            --border-color: #e0e0e0;
-            --danger-color: #dc3545;
+            --text-color: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --danger-color: #d93025;
+            --danger-bg: rgba(217, 48, 37, 0.1);
+            --success-color: #1e8e3e;
+            --success-bg: rgba(30, 142, 62, 0.1);
+            --info-bg: rgba(66, 133, 244, 0.08);
+            --input-bg: #ffffff;
+            --shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+            --transition: all 0.2s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #8ab4f8;
+                --primary-hover: #aecbfa;
+                --bg-color: #202124;
+                --card-bg: #292a2d;
+                --text-color: #e8eaed;
+                --text-secondary: #9aa0a6;
+                --border-color: #3c4043;
+                --danger-color: #f28b82;
+                --danger-bg: rgba(242, 139, 130, 0.15);
+                --success-color: #81c995;
+                --success-bg: rgba(129, 201, 149, 0.15);
+                --info-bg: rgba(138, 180, 248, 0.12);
+                --input-bg: #303134;
+                --shadow: 0 1px 2px 0 rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+            }
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
@@ -26,22 +53,46 @@
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
 
         header {
-            padding: 16px;
+            padding: 12px 16px;
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         header h3 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 500;
             color: var(--primary-color);
+        }
+
+        #open-settings {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            background: var(--bg-color);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        #open-settings:hover {
+            background: var(--border-color);
+            color: var(--text-color);
         }
 
         .main-content {
@@ -55,24 +106,24 @@
 
         .card {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 16px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: var(--shadow);
         }
 
         .card-title {
-            margin: 0 0 12px 0;
-            font-size: 0.9rem;
+            margin: 0 0 14px 0;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
             color: var(--text-secondary);
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .scope-selector {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             margin-bottom: 12px;
         }
 
@@ -84,10 +135,11 @@
             padding: 8px;
             background: var(--bg-color);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
         }
 
         .scope-selector input {
@@ -96,78 +148,116 @@
 
         .scope-selector label:has(input:checked) {
             background: var(--primary-color);
-            color: white;
+            color: var(--bg-color);
             border-color: var(--primary-color);
         }
 
         #domain-display {
-            font-size: 0.85rem;
-            padding: 8px 12px;
-            background: #eef4ff;
-            border-radius: 4px;
+            font-size: 0.8rem;
+            padding: 10px 14px;
+            background: rgba(66, 133, 244, 0.08);
+            border-radius: 8px;
             color: var(--primary-color);
             margin-bottom: 12px;
             word-break: break-all;
+            font-family: monospace;
+            border: 1px solid transparent;
         }
 
         textarea {
             width: 100%;
-            height: 180px;
-            font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+            height: 160px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
             font-size: 0.85rem;
             padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 8px;
             resize: vertical;
             box-sizing: border-box;
-            background: #fafafa;
+            background: var(--input-bg);
+            color: var(--text-color);
+            transition: var(--transition);
         }
 
         textarea:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+        }
+
+        .privacy-settings {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .privacy-settings label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-color);
         }
 
         .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
+            margin-top: 16px;
         }
 
         button {
-            padding: 10px 16px;
+            width: 100%;
+            padding: 12px;
             cursor: pointer;
             background-color: var(--primary-color);
-            color: white;
+            color: var(--bg-color);
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 600;
-            font-size: 0.9rem;
-            transition: background 0.2s;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         button:hover {
             background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         button:disabled {
-            background-color: #ccc;
+            background-color: var(--border-color);
+            color: var(--text-secondary);
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .status {
             font-size: 0.8rem;
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 12px;
             text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .status:empty { display: none; }
-        .status.success { background: #e6ffed; color: #28a745; border: 1px solid #c3e6cb; }
-        .status.error { background: #fff5f5; color: #dc3545; border: 1px solid #f5c6cb; }
+        .status.success { background: var(--success-bg); color: var(--success-color); border: 1px solid var(--success-color); }
+        .status.error { background: var(--danger-bg); color: var(--danger-color); border: 1px solid var(--danger-color); }
 
         .saved-scopes-list {
             list-style: none;
@@ -175,22 +265,24 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .saved-scope-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: var(--bg-color);
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 0.85rem;
-            transition: background 0.2s;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
         }
 
         .saved-scope-item:hover {
-            background: #edf2f7;
+            border-color: var(--primary-color);
+            background: var(--card-bg);
         }
 
         .saved-scope-name {
@@ -199,36 +291,35 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-right: 8px;
+            margin-right: 12px;
+            font-weight: 500;
         }
 
         .delete-scope {
-            color: var(--danger-color);
+            color: var(--text-secondary);
             cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            font-size: 1.1rem;
+            padding: 6px;
+            border-radius: 50%;
+            font-size: 1.2rem;
             line-height: 1;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
         }
 
         .delete-scope:hover {
-            background: #ffe5e5;
+            background: rgba(217, 48, 37, 0.1);
+            color: var(--danger-color);
         }
 
-        .privacy-settings label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            cursor: pointer;
-            font-size: 0.9rem;
-            border-bottom: 1px solid var(--bg-color);
-        }
-
+        /* Custom Switch */
         .switch {
             position: relative;
             display: inline-block;
-            width: 34px;
+            width: 36px;
             height: 20px;
         }
 
@@ -238,7 +329,7 @@
             position: absolute;
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
+            background-color: var(--border-color);
             transition: .4s;
             border-radius: 20px;
         }
@@ -254,23 +345,29 @@
         }
 
         input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(14px); }
+        input:checked + .slider:before { transform: translateX(16px); }
 
         .toggle-container {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
     </style>
 </head>
 <body>
     <header>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="header-left">
             <h3>CSS Injector</h3>
-            <button id="open-settings" style="padding: 4px 8px; font-size: 0.7rem; background: #eee; color: #666; border: 1px solid #ccc;">Settings</button>
+            <button id="open-settings">Settings</button>
         </div>
         <div class="toggle-container">
             <span>Enabled</span>
@@ -296,7 +393,7 @@
             
             <textarea id="css-input" placeholder="/* CSS Code here */"></textarea>
             
-            <div class="privacy-settings" style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+            <div class="privacy-settings">
                 <label>
                     <div class="switch">
                         <input type="checkbox" id="toggle-gtag">
@@ -330,3 +427,4 @@
     <script type="module" src="/src/sidepanel.js"></script>
 </body>
 </html>
+
