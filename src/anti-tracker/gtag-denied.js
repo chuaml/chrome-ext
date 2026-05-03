@@ -1,6 +1,8 @@
 {
-    chrome.storage.local.get(['gtag_enabled'], (res) => {
-        if (res.gtag_enabled === false) return;
+    const hostname = window.location.hostname;
+    chrome.storage.local.get([`gtag_${hostname}`, 'gtag_global'], (res) => {
+        const isEnabled = res[`gtag_${hostname}`] !== undefined ? res[`gtag_${hostname}`] : !!res.gtag_global;
+        if (!isEnabled) return;
 
         window.dataLayer = [];
         const GTAG = function () { window.dataLayer.push(arguments); };

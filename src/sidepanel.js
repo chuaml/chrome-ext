@@ -9,143 +9,241 @@ const scopeGlobal = document.getElementById('scope-global');
 const masterToggle = document.getElementById('master-toggle');
 const toggleGtag = document.getElementById('toggle-gtag');
 const toggleReferrer = document.getElementById('toggle-referrer');
+const savedScopesList = document.getElementById('saved-scopes-list');
 
-let currentDomain = '';
+let currentTabDomain = '';
+let isUpdatingFromStorage = false;
 
-const DEFAULT_GLOBAL_CSS = `html {
-    filter: invert(.9) hue-rotate(180deg) saturate(1.5) brightness(1.1);
-    background-color: #ddd;
-}
-
-img[src],
-video[src],
-[class*="img"],
-[class*="image"] {
-    filter: invert(1) hue-rotate(180deg);
+const DEFAULT_GLOBAL_CSS = `/* Global Styles */
+html {
+    /* Example: Dark mode filter */
+    /* filter: invert(.9) hue-rotate(180deg); */
 }`;
 
-async function getActiveScope() {
-    return scopeDomain.checked ? 'domain' : 'global';
+function showStatus(message, type = 'success') {
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+    setTimeout(() => {
+        if (statusDiv.textContent === message) {
+            statusDiv.textContent = '';
+            statusDiv.className = 'status';
+        }
+    }, 3000);
+}
+
+async function getSession() {
+    const res = await chrome.storage.local.get(['ui_session']);
+    return res.ui_session || {
+        scope: 'domain',
+        mode: 'active_tab',
+        target: ''
+    };
+}
+
+async function saveSession(session) {
+    if (isUpdatingFromStorage) return;
+    await chrome.storage.local.set({ ui_session: session });
+}
+
+async function updateSavedScopesList() {
+    const allStorage = await chrome.storage.local.get(null);
+    savedScopesList.innerHTML = '';
+    
+    const savedKeys = Object.keys(allStorage);
+    const savedDomains = new Set();
+
+    savedKeys.forEach(key => {
+        if (key.startsWith('css_') || key.startsWith('gtag_') || key.startsWith('referrer_')) {
+            const domain = key.split('_').slice(1).join('_');
+            if (domain && domain !== 'global') savedDomains.add(domain);
+        }
+    });
+
+    // Always show Global in saved scopes if not already there
+    const sortedDomains = ['global', ...Array.from(savedDomains).sort()];
+
+    sortedDomains.forEach(domain => {
+        const li = document.createElement('li');
+        li.className = 'saved-scope-item';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'saved-scope-name';
+        nameSpan.textContent = domain === 'global' ? '🌐 Global Session' : domain;
+        nameSpan.onclick = () => loadSavedScope(domain);
+        
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'delete-scope';
+        deleteBtn.textContent = '×';
+        if (domain === 'global') deleteBtn.style.visibility = 'hidden';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteSavedScope(domain);
+        };
+        
+        li.appendChild(nameSpan);
+        li.appendChild(deleteBtn);
+        savedScopesList.appendChild(li);
+    });
+}
+
+async function loadSavedScope(domain) {
+    const session = await getSession();
+    session.mode = 'viewing_saved';
+    session.target = domain;
+    session.scope = (domain === 'global') ? 'global' : 'domain';
+    await saveSession(session);
+    updateUI();
+}
+
+async function deleteSavedScope(domain) {
+    if (confirm(`Delete settings for ${domain}?`)) {
+        await chrome.storage.local.remove([`css_${domain}`, `gtag_${domain}`, `referrer_${domain}`]);
+        const session = await getSession();
+        if (session.target === domain) {
+            session.mode = 'active_tab';
+            session.target = '';
+            await saveSession(session);
+        }
+        updateUI();
+    }
 }
 
 async function updateUI() {
-    const scope = await getActiveScope();
+    if (isUpdatingFromStorage) return;
+
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
     if (tab && tab.url && tab.url.startsWith('http')) {
         try {
-            const url = new URL(tab.url);
-            currentDomain = url.hostname;
+            currentTabDomain = new URL(tab.url).hostname;
         } catch (e) {
-            currentDomain = '';
+            currentTabDomain = '';
         }
     } else {
-        currentDomain = '';
+        currentTabDomain = '';
     }
 
-    if (scope === 'domain') {
-        domainDisplay.textContent = currentDomain ? `Customizing: ${currentDomain}` : 'Navigate to a website';
-        if (currentDomain) {
-            const storageKey = `css_${currentDomain}`;
-            const result = await chrome.storage.local.get([storageKey]);
-            cssInput.value = result[storageKey] || '';
-        } else {
-            cssInput.value = '';
-        }
+    const session = await getSession();
+    
+    // Determine effective target
+    let effectiveTarget = '';
+    if (session.mode === 'active_tab') {
+        effectiveTarget = (session.scope === 'global') ? 'global' : currentTabDomain;
     } else {
-        domainDisplay.textContent = 'Customizing: Global Session';
-        const result = await chrome.storage.local.get(['css_global']);
-        cssInput.value = result.css_global !== undefined ? result.css_global : DEFAULT_GLOBAL_CSS;
+        effectiveTarget = session.target;
     }
+
+    // Sync radio buttons
+    scopeGlobal.checked = (session.scope === 'global');
+    scopeDomain.checked = (session.scope === 'domain');
+
+    // Update display
+    if (session.scope === 'global') {
+        domainDisplay.textContent = 'Scope: Global Session';
+    } else if (session.mode === 'active_tab') {
+        domainDisplay.textContent = currentTabDomain ? `Active Domain: ${currentTabDomain}` : 'Navigate to a website';
+    } else {
+        domainDisplay.textContent = `Viewing Saved: ${session.target}`;
+    }
+
+    // Load data from storage for the effective target
+    const lookupTarget = effectiveTarget || 'global';
+    const storageKeys = [`css_${lookupTarget}`, `gtag_${lookupTarget}`, `referrer_${lookupTarget}`];
+    const result = await chrome.storage.local.get(storageKeys);
+
+    // Only update textarea if it's not currently focused to avoid jumpy behavior
+    // (Though for total sync we might want to update it anyway)
+    cssInput.value = result[`css_${lookupTarget}`] || (lookupTarget === 'global' ? DEFAULT_GLOBAL_CSS : '');
+    toggleGtag.checked = !!result[`gtag_${lookupTarget}`];
+    toggleReferrer.checked = !!result[`referrer_${lookupTarget}`];
 
     // Disable UI if master toggle is off
     const enabled = masterToggle.checked;
-    cssInput.disabled = !enabled;
-    injectBtn.disabled = !enabled;
-    scopeDomain.disabled = !enabled;
-    scopeGlobal.disabled = !enabled;
+    [cssInput, injectBtn, scopeDomain, scopeGlobal, toggleGtag, toggleReferrer].forEach(el => el.disabled = !enabled);
     
-    statusDiv.textContent = enabled ? '' : 'Injector is disabled globally.';
+    updateSavedScopesList();
 }
 
 // Initial load
-chrome.storage.local.get(['injector_enabled', 'last_scope', 'gtag_enabled', 'referrer_enabled'], (res) => {
+chrome.storage.local.get(['injector_enabled'], (res) => {
     if (res.injector_enabled !== undefined) {
         masterToggle.checked = res.injector_enabled;
-    }
-    if (res.gtag_enabled !== undefined) {
-        toggleGtag.checked = res.gtag_enabled;
-    }
-    if (res.referrer_enabled !== undefined) {
-        toggleReferrer.checked = res.referrer_enabled;
-    }
-    if (res.last_scope === 'global') {
-        scopeGlobal.checked = true;
     }
     updateUI();
 });
 
-// Listeners for UI updates
+// Sync across sidepanel instances
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+
+    if (changes.ui_session || changes.injector_enabled) {
+        if (changes.injector_enabled) {
+            masterToggle.checked = changes.injector_enabled.newValue;
+        }
+        isUpdatingFromStorage = true;
+        updateUI().then(() => isUpdatingFromStorage = false);
+    }
+    
+    // If CSS or privacy settings for the CURRENTLY DISPLAYED target changed elsewhere
+    getSession().then(session => {
+        const lookupTarget = (session.mode === 'active_tab' && session.scope === 'domain') ? currentTabDomain : (session.target || 'global');
+        const relevantKeys = [`css_${lookupTarget}`, `gtag_${lookupTarget}`, `referrer_${lookupTarget}`];
+        if (Object.keys(changes).some(k => relevantKeys.includes(k))) {
+            updateUI();
+        }
+        updateSavedScopesList();
+    });
+});
+
+// Event Listeners
 chrome.tabs.onActivated.addListener(updateUI);
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (changeInfo.status === 'complete') updateUI();
 });
-scopeDomain.addEventListener('change', updateUI);
-scopeGlobal.addEventListener('change', updateUI);
 
-masterToggle.addEventListener('change', async () => {
-    await chrome.storage.local.set({ injector_enabled: masterToggle.checked });
+scopeDomain.addEventListener('change', async () => {
+    const session = await getSession();
+    session.scope = 'domain';
+    session.mode = 'active_tab'; // Reset to active tab when clicking domain radio
+    await saveSession(session);
     updateUI();
 });
 
-toggleGtag.addEventListener('change', async () => {
-    await chrome.storage.local.set({ gtag_enabled: toggleGtag.checked });
+scopeGlobal.addEventListener('change', async () => {
+    const session = await getSession();
+    session.scope = 'global';
+    session.mode = 'active_tab';
+    await saveSession(session);
+    updateUI();
 });
 
-toggleReferrer.addEventListener('change', async () => {
-    await chrome.storage.local.set({ referrer_enabled: toggleReferrer.checked });
+masterToggle.addEventListener('change', async () => {
+    await chrome.storage.local.set({ injector_enabled: masterToggle.checked });
 });
 
 injectBtn.addEventListener('click', async () => {
     if (!masterToggle.checked) return;
 
-    const scope = await getActiveScope();
-    const cssCode = cssInput.value;
-    
-    let storageKey;
-    if (scope === 'domain') {
-        if (!currentDomain) {
-            statusDiv.textContent = 'No domain to inject into.';
-            return;
-        }
-        storageKey = `css_${currentDomain}`;
-    } else {
-        storageKey = 'css_global';
+    const session = await getSession();
+    const lookupTarget = (session.mode === 'active_tab' && session.scope === 'domain') ? currentTabDomain : (session.target || 'global');
+
+    if (!lookupTarget) {
+        showStatus('No target to save settings for.', 'error');
+        return;
     }
 
-    // Save CSS
-    await chrome.storage.local.set({ [storageKey]: cssCode });
-    await chrome.storage.local.set({ last_scope: scope }); // Remember scope
-    
-    statusDiv.textContent = 'Injecting...';
+    const settings = {
+        [`css_${lookupTarget}`]: cssInput.value,
+        [`gtag_${lookupTarget}`]: toggleGtag.checked,
+        [`referrer_${lookupTarget}`]: toggleReferrer.checked
+    };
 
-    // Send message to background script
+    await chrome.storage.local.set(settings);
+    showStatus('Settings Saved & Applied!');
+
+    // Trigger injection
     chrome.runtime.sendMessage({ 
         action: 'insertCss', 
-        scope: scope,
-        domain: currentDomain 
-    }, (response) => {
-        if (chrome.runtime.lastError) {
-            statusDiv.textContent = 'Error: ' + chrome.runtime.lastError.message;
-        } else if (response && response.success) {
-            statusDiv.textContent = `CSS (${scope}) Injected successfully!`;
-            setTimeout(() => {
-                if (statusDiv.textContent.includes('Injected successfully')) {
-                    statusDiv.textContent = '';
-                }
-            }, 3000);
-        } else {
-            statusDiv.textContent = 'Injection failed: ' + (response?.error || 'Unknown error');
-        }
+        scope: session.scope,
+        domain: lookupTarget 
     });
 });

@@ -79,8 +79,8 @@ export default {
         },
         {
             "matches": [
-                "http://x/*",
-                "https://x/*"
+                "http://*/*",
+                "https://*/*"
             ],
             "exclude_matches": [
                 "https://mail.google.com/*",

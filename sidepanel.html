@@ -5,66 +5,322 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSS Injector</title>
     <style>
+        :root {
+            --primary-color: #4285f4;
+            --primary-hover: #357abd;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --text-secondary: #666;
+            --border-color: #e0e0e0;
+            --danger-color: #dc3545;
+        }
+
         body {
-            font-family: sans-serif;
-            padding: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            height: 100vh;
+            overflow: hidden;
         }
+
+        header {
+            padding: 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .card-title {
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .scope-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .scope-selector label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .scope-selector input {
+            display: none;
+        }
+
+        .scope-selector label:has(input:checked) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        #domain-display {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            background: #eef4ff;
+            border-radius: 4px;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+
         textarea {
             width: 100%;
-            height: 200px;
-            font-family: monospace;
+            height: 180px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             resize: vertical;
+            box-sizing: border-box;
+            background: #fafafa;
         }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
         button {
-            padding: 8px;
+            padding: 10px 16px;
             cursor: pointer;
-            background-color: #4285f4;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
         }
+
         button:hover {
-            background-color: #357abd;
+            background-color: var(--primary-hover);
         }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         .status {
-            font-size: 0.8em;
-            color: #666;
+            font-size: 0.8rem;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            text-align: center;
         }
+
+        .status:empty { display: none; }
+        .status.success { background: #e6ffed; color: #28a745; border: 1px solid #c3e6cb; }
+        .status.error { background: #fff5f5; color: #dc3545; border: 1px solid #f5c6cb; }
+
+        .saved-scopes-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .saved-scope-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg-color);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .saved-scope-item:hover {
+            background: #edf2f7;
+        }
+
+        .saved-scope-name {
+            cursor: pointer;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 8px;
+        }
+
+        .delete-scope {
+            color: var(--danger-color);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .delete-scope:hover {
+            background: #ffe5e5;
+        }
+
+        .privacy-settings label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--bg-color);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(14px); }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
     </style>
 </head>
 <body>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-        <h3 style="margin: 0;">CSS Injector</h3>
-        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: bold;">
-            <input type="checkbox" id="master-toggle" checked> Enabled
-        </label>
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-        <label style="font-size: 0.9em; cursor: pointer;">
-            <input type="radio" name="scope" value="domain" checked id="scope-domain"> Domain
-        </label>
-        <label style="font-size: 0.9em; cursor: pointer;">
-            <input type="radio" name="scope" value="global" id="scope-global"> Global
-        </label>
-    </div>
-    <div id="domain-display" style="font-size: 0.9em; margin-bottom: 5px; color: #444; font-weight: bold;"></div>
-    <textarea id="css-input" placeholder="/* Enter CSS here */
-body { background: red !important; }"></textarea>
-    <button id="inject-btn">Inject CSS</button>
-    <div id="status" class="status"></div>
+    <header>
+        <h3>CSS Injector</h3>
+        <div class="toggle-container">
+            <span>Enabled</span>
+            <label class="switch">
+                <input type="checkbox" id="master-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
 
-    <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-        <h4 style="margin: 0 0 10px 0;">Privacy Settings</h4>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;">
-                <input type="checkbox" id="toggle-gtag" checked> Block GTag Tracking
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;">
-                <input type="checkbox" id="toggle-referrer" checked> Stealth Referrer Policy
-            </label>
+    <div class="main-content">
+        <div class="card">
+            <div class="card-title">Injection Editor</div>
+            <div class="scope-selector">
+                <label>
+                    <input type="radio" name="scope" value="domain" checked id="scope-domain"> Domain
+                </label>
+                <label>
+                    <input type="radio" name="scope" value="global" id="scope-global"> Global
+                </label>
+            </div>
+            <div id="domain-display">Detecting domain...</div>
+            
+            <textarea id="css-input" placeholder="/* CSS Code here */"></textarea>
+            
+            <div class="privacy-settings" style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+                <label>
+                    <div class="switch">
+                        <input type="checkbox" id="toggle-gtag">
+                        <span class="slider"></span>
+                    </div>
+                    <span>Block GTag Tracking</span>
+                </label>
+                <label>
+                    <div class="switch">
+                        <input type="checkbox" id="toggle-referrer">
+                        <span class="slider"></span>
+                    </div>
+                    <span>Stealth Referrer Policy</span>
+                </label>
+            </div>
+
+            <div class="actions">
+                <button id="inject-btn">Save & Inject</button>
+            </div>
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Saved Scopes</div>
+            <ul id="saved-scopes-list" class="saved-scopes-list">
+                <!-- Items populated by JS -->
+            </ul>
         </div>
     </div>
 
