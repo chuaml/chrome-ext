@@ -7,6 +7,11 @@ export default defineConfig({
     plugins: [
         crx({ manifest: final_manifest_json }),
     ],
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        include: ['src/**/*.{test,spec}.{js,ts}'],
+    },
     server: {
         watch: {
             ignored: ['**/manifest.json'] // Prevent restarts from manifest edits
