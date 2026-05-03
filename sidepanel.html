@@ -43,6 +43,40 @@
             }
         }
 
+        body[data-theme="light"] {
+            --primary-color: #4285f4;
+            --primary-hover: #357abd;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --danger-color: #d93025;
+            --danger-bg: rgba(217, 48, 37, 0.1);
+            --success-color: #1e8e3e;
+            --success-bg: rgba(30, 142, 62, 0.1);
+            --info-bg: rgba(66, 133, 244, 0.08);
+            --input-bg: #ffffff;
+            --shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+        }
+
+        body[data-theme="dark"] {
+            --primary-color: #8ab4f8;
+            --primary-hover: #aecbfa;
+            --bg-color: #202124;
+            --card-bg: #292a2d;
+            --text-color: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --border-color: #3c4043;
+            --danger-color: #f28b82;
+            --danger-bg: rgba(242, 139, 130, 0.15);
+            --success-color: #81c995;
+            --success-bg: rgba(129, 201, 149, 0.15);
+            --info-bg: rgba(138, 180, 248, 0.12);
+            --input-bg: #303134;
+            --shadow: 0 1px 2px 0 rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+        }
+
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
@@ -368,6 +402,11 @@
         <div class="header-left">
             <h3>CSS Injector</h3>
             <button id="open-settings">Settings</button>
+            <select id="theme-select" style="font-size: 0.7rem; background: var(--bg-color); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 4px;">
+                <option value="system">Auto</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
         </div>
         <div class="toggle-container">
             <span>Enabled</span>

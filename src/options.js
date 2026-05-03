@@ -1,7 +1,11 @@
 'use strict';
 
+import { storage } from './utils/storage.js';
+import { applyTheme, watchThemeChanges } from './utils/theme.js';
+
 const settingsBody = document.getElementById('settings-body');
 const searchInput = document.getElementById('search-input');
+const themeSelect = document.getElementById('theme-select');
 const btnRefresh = document.getElementById('btn-refresh');
 const btnExport = document.getElementById('btn-export');
 const btnImport = document.getElementById('btn-import');
@@ -23,7 +27,7 @@ const closeImport = document.getElementById('close-import');
 let currentEditingKey = null;
 
 async function loadSettings() {
-    const allStorage = await chrome.storage.local.get(null);
+    const allStorage = await storage.getAll();
     const filter = searchInput.value.toLowerCase();
     
     settingsBody.innerHTML = '';
@@ -42,11 +46,12 @@ async function loadSettings() {
         // Type
         const typeCell = document.createElement('td');
         let type = 'Other';
-        if (key.startsWith('css_')) type = 'CSS';
-        else if (key.startsWith('gtag_')) type = 'GTag';
-        else if (key.startsWith('referrer_')) type = 'Referrer';
-        else if (key === 'ui_session') type = 'Session';
-        else if (key === 'injector_enabled') type = 'Global Toggle';
+        if (key.startsWith(storage.KEYS.CSS_PREFIX)) type = 'CSS';
+        else if (key.startsWith(storage.KEYS.GTAG_PREFIX)) type = 'GTag';
+        else if (key.startsWith(storage.KEYS.REFERRER_PREFIX)) type = 'Referrer';
+        else if (key === storage.KEYS.UI_SESSION) type = 'Session';
+        else if (key === storage.KEYS.INJECTOR_ENABLED) type = 'Global Toggle';
+        else if (key === storage.KEYS.THEME_PREFERENCE) type = 'Theme';
         
         const badge = document.createElement('span');
         badge.className = 'badge';
@@ -87,15 +92,17 @@ async function loadSettings() {
     updateGlobalState(allStorage);
 }
 
-function updateGlobalState(storage) {
+function updateGlobalState(allStorage) {
     const content = document.getElementById('global-state-content');
     content.innerHTML = '';
     
-    const session = storage.ui_session || {};
-    const enabled = storage.injector_enabled !== false;
+    const session = allStorage[storage.KEYS.UI_SESSION] || {};
+    const enabled = allStorage[storage.KEYS.INJECTOR_ENABLED] !== false;
+    const theme = allStorage[storage.KEYS.THEME_PREFERENCE] || 'system';
     
     const items = [
         { label: 'Injector Enabled', value: enabled ? '✅ Active' : '❌ Disabled' },
+        { label: 'Current Theme', value: theme.charAt(0).toUpperCase() + theme.slice(1) },
         { label: 'UI Scope', value: session.scope || 'None' },
         { label: 'UI Mode', value: session.mode || 'None' },
         { label: 'UI Target', value: session.target || 'None' }
@@ -110,6 +117,8 @@ function updateGlobalState(storage) {
         `;
         content.appendChild(div);
     });
+
+    themeSelect.value = theme;
 }
 
 function openEditModal(key, value) {
@@ -122,39 +131,38 @@ function openEditModal(key, value) {
 async function saveEdit() {
     let value = editArea.value;
     
-    // Try to parse as JSON if it looks like JSON or if it's a known object key
-    if (currentEditingKey === 'ui_session' || value.trim().startsWith('{') || value.trim().startsWith('[')) {
+    if (currentEditingKey === storage.KEYS.UI_SESSION || value.trim().startsWith('{') || value.trim().startsWith('[')) {
         try {
             value = JSON.parse(value);
         } catch (e) {
-            // If it fails but was supposed to be JSON, maybe alert the user
-            if (currentEditingKey === 'ui_session') {
+            if (currentEditingKey === storage.KEYS.UI_SESSION) {
                 alert('Invalid JSON for ui_session');
                 return;
             }
         }
     }
     
-    // Handle booleans for gtag/referrer
-    if (currentEditingKey.startsWith('gtag_') || currentEditingKey.startsWith('referrer_') || currentEditingKey === 'injector_enabled') {
+    if (currentEditingKey.startsWith(storage.KEYS.GTAG_PREFIX) || 
+        currentEditingKey.startsWith(storage.KEYS.REFERRER_PREFIX) || 
+        currentEditingKey === storage.KEYS.INJECTOR_ENABLED) {
         if (value === 'true') value = true;
         if (value === 'false') value = false;
     }
 
-    await chrome.storage.local.set({ [currentEditingKey]: value });
+    await storage.set({ [currentEditingKey]: value });
     editModal.style.display = 'none';
     loadSettings();
 }
 
 async function deleteKey(key) {
     if (confirm(`Are you sure you want to delete "${key}"?`)) {
-        await chrome.storage.local.remove(key);
+        await storage.remove(key);
         loadSettings();
     }
 }
 
 async function exportConfig() {
-    const allStorage = await chrome.storage.local.get(null);
+    const allStorage = await storage.getAll();
     const blob = new Blob([JSON.stringify(allStorage, null, 4)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -168,8 +176,8 @@ async function importConfig() {
     try {
         const config = JSON.parse(importArea.value);
         if (confirm('This will overwrite existing settings. Continue?')) {
-            await chrome.storage.local.clear();
-            await chrome.storage.local.set(config);
+            await storage.clear();
+            await storage.set(config);
             importModal.style.display = 'none';
             importArea.value = '';
             loadSettings();
@@ -183,11 +191,15 @@ async function importConfig() {
 // Event Listeners
 btnRefresh.addEventListener('click', loadSettings);
 searchInput.addEventListener('input', loadSettings);
+themeSelect.addEventListener('change', async () => {
+    await storage.setThemePreference(themeSelect.value);
+});
+
 btnExport.addEventListener('click', exportConfig);
 btnImport.addEventListener('click', () => importModal.style.display = 'flex');
 btnReset.addEventListener('click', async () => {
     if (confirm('REALLY delete EVERYTHING? This cannot be undone.')) {
-        await chrome.storage.local.clear();
+        await storage.clear();
         loadSettings();
     }
 });
@@ -200,11 +212,14 @@ btnConfirmImport.addEventListener('click', importConfig);
 btnCancelImport.addEventListener('click', () => importModal.style.display = 'none');
 closeImport.addEventListener('click', () => importModal.style.display = 'none');
 
-// Close modals on outside click
 window.onclick = (event) => {
     if (event.target === editModal) editModal.style.display = 'none';
     if (event.target === importModal) importModal.style.display = 'none';
 };
 
 // Initial load
-loadSettings();
+(async () => {
+    await applyTheme();
+    watchThemeChanges();
+    loadSettings();
+})();

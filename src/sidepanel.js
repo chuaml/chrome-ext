@@ -1,5 +1,8 @@
 'use strict';
 
+import { storage } from './utils/storage.js';
+import { applyTheme, watchThemeChanges } from './utils/theme.js';
+
 const cssInput = document.getElementById('css-input');
 const injectBtn = document.getElementById('inject-btn');
 const statusDiv = document.getElementById('status');
@@ -10,8 +13,8 @@ const masterToggle = document.getElementById('master-toggle');
 const toggleGtag = document.getElementById('toggle-gtag');
 const toggleReferrer = document.getElementById('toggle-referrer');
 const savedScopesList = document.getElementById('saved-scopes-list');
-
 const openSettingsBtn = document.getElementById('open-settings');
+const themeSelect = document.getElementById('theme-select');
 
 let currentTabDomain = '';
 let isUpdatingFromStorage = false;
@@ -33,35 +36,22 @@ function showStatus(message, type = 'success') {
     }, 3000);
 }
 
-async function getSession() {
-    const res = await chrome.storage.local.get(['ui_session']);
-    return res.ui_session || {
-        scope: 'domain',
-        mode: 'active_tab',
-        target: ''
-    };
-}
-
-async function saveSession(session) {
-    if (isUpdatingFromStorage) return;
-    await chrome.storage.local.set({ ui_session: session });
-}
-
 async function updateSavedScopesList() {
-    const allStorage = await chrome.storage.local.get(null);
+    const allStorage = await storage.getAll();
     savedScopesList.innerHTML = '';
     
     const savedKeys = Object.keys(allStorage);
     const savedDomains = new Set();
 
     savedKeys.forEach(key => {
-        if (key.startsWith('css_') || key.startsWith('gtag_') || key.startsWith('referrer_')) {
+        if (key.startsWith(storage.KEYS.CSS_PREFIX) || 
+            key.startsWith(storage.KEYS.GTAG_PREFIX) || 
+            key.startsWith(storage.KEYS.REFERRER_PREFIX)) {
             const domain = key.split('_').slice(1).join('_');
             if (domain && domain !== 'global') savedDomains.add(domain);
         }
     });
 
-    // Always show Global in saved scopes if not already there
     const sortedDomains = ['global', ...Array.from(savedDomains).sort()];
 
     sortedDomains.forEach(domain => {
@@ -89,22 +79,26 @@ async function updateSavedScopesList() {
 }
 
 async function loadSavedScope(domain) {
-    const session = await getSession();
+    const session = await storage.getUiSession();
     session.mode = 'viewing_saved';
     session.target = domain;
     session.scope = (domain === 'global') ? 'global' : 'domain';
-    await saveSession(session);
+    await storage.setUiSession(session);
     updateUI();
 }
 
 async function deleteSavedScope(domain) {
     if (confirm(`Delete settings for ${domain}?`)) {
-        await chrome.storage.local.remove([`css_${domain}`, `gtag_${domain}`, `referrer_${domain}`]);
-        const session = await getSession();
+        await storage.remove([
+            `${storage.KEYS.CSS_PREFIX}${domain}`, 
+            `${storage.KEYS.GTAG_PREFIX}${domain}`, 
+            `${storage.KEYS.REFERRER_PREFIX}${domain}`
+        ]);
+        const session = await storage.getUiSession();
         if (session.target === domain) {
             session.mode = 'active_tab';
             session.target = '';
-            await saveSession(session);
+            await storage.setUiSession(session);
         }
         updateUI();
     }
@@ -124,9 +118,8 @@ async function updateUI() {
         currentTabDomain = '';
     }
 
-    const session = await getSession();
+    const session = await storage.getUiSession();
     
-    // Determine effective target
     let effectiveTarget = '';
     if (session.mode === 'active_tab') {
         effectiveTarget = (session.scope === 'global') ? 'global' : currentTabDomain;
@@ -134,11 +127,9 @@ async function updateUI() {
         effectiveTarget = session.target;
     }
 
-    // Sync radio buttons
     scopeGlobal.checked = (session.scope === 'global');
     scopeDomain.checked = (session.scope === 'domain');
 
-    // Update display
     if (session.scope === 'global') {
         domainDisplay.textContent = 'Scope: Global Session';
     } else if (session.mode === 'active_tab') {
@@ -147,48 +138,52 @@ async function updateUI() {
         domainDisplay.textContent = `Viewing Saved: ${session.target}`;
     }
 
-    // Load data from storage for the effective target
     const lookupTarget = effectiveTarget || 'global';
-    const storageKeys = [`css_${lookupTarget}`, `gtag_${lookupTarget}`, `referrer_${lookupTarget}`];
-    const result = await chrome.storage.local.get(storageKeys);
+    const settings = await storage.getDomainSettings(lookupTarget);
 
-    // Only update textarea if it's not currently focused to avoid jumpy behavior
-    // (Though for total sync we might want to update it anyway)
-    cssInput.value = result[`css_${lookupTarget}`] || (lookupTarget === 'global' ? DEFAULT_GLOBAL_CSS : '');
-    toggleGtag.checked = !!result[`gtag_${lookupTarget}`];
-    toggleReferrer.checked = !!result[`referrer_${lookupTarget}`];
+    cssInput.value = settings.css || (lookupTarget === 'global' ? DEFAULT_GLOBAL_CSS : '');
+    toggleGtag.checked = settings.gtag;
+    toggleReferrer.checked = settings.referrer;
 
-    // Disable UI if master toggle is off
-    const enabled = masterToggle.checked;
+    const enabled = await storage.isInjectorEnabled();
+    masterToggle.checked = enabled;
     [cssInput, injectBtn, scopeDomain, scopeGlobal, toggleGtag, toggleReferrer].forEach(el => el.disabled = !enabled);
     
+    const theme = await storage.getThemePreference();
+    themeSelect.value = theme;
+
     updateSavedScopesList();
 }
 
 // Initial load
-chrome.storage.local.get(['injector_enabled'], (res) => {
-    if (res.injector_enabled !== undefined) {
-        masterToggle.checked = res.injector_enabled;
-    }
+(async () => {
+    await applyTheme();
+    watchThemeChanges();
     updateUI();
-});
+})();
 
-// Sync across sidepanel instances
+// Sync changes from other pages
 chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
 
-    if (changes.ui_session || changes.injector_enabled) {
-        if (changes.injector_enabled) {
-            masterToggle.checked = changes.injector_enabled.newValue;
-        }
+    const importantKeys = [
+        storage.KEYS.UI_SESSION, 
+        storage.KEYS.INJECTOR_ENABLED, 
+        storage.KEYS.THEME_PREFERENCE
+    ];
+
+    if (Object.keys(changes).some(k => importantKeys.includes(k))) {
         isUpdatingFromStorage = true;
         updateUI().then(() => isUpdatingFromStorage = false);
     }
     
-    // If CSS or privacy settings for the CURRENTLY DISPLAYED target changed elsewhere
-    getSession().then(session => {
+    storage.getUiSession().then(session => {
         const lookupTarget = (session.mode === 'active_tab' && session.scope === 'domain') ? currentTabDomain : (session.target || 'global');
-        const relevantKeys = [`css_${lookupTarget}`, `gtag_${lookupTarget}`, `referrer_${lookupTarget}`];
+        const relevantKeys = [
+            `${storage.KEYS.CSS_PREFIX}${lookupTarget}`, 
+            `${storage.KEYS.GTAG_PREFIX}${lookupTarget}`, 
+            `${storage.KEYS.REFERRER_PREFIX}${lookupTarget}`
+        ];
         if (Object.keys(changes).some(k => relevantKeys.includes(k))) {
             updateUI();
         }
@@ -203,23 +198,27 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 });
 
 scopeDomain.addEventListener('change', async () => {
-    const session = await getSession();
+    const session = await storage.getUiSession();
     session.scope = 'domain';
-    session.mode = 'active_tab'; // Reset to active tab when clicking domain radio
-    await saveSession(session);
+    session.mode = 'active_tab';
+    await storage.setUiSession(session);
     updateUI();
 });
 
 scopeGlobal.addEventListener('change', async () => {
-    const session = await getSession();
+    const session = await storage.getUiSession();
     session.scope = 'global';
     session.mode = 'active_tab';
-    await saveSession(session);
+    await storage.setUiSession(session);
     updateUI();
 });
 
 masterToggle.addEventListener('change', async () => {
-    await chrome.storage.local.set({ injector_enabled: masterToggle.checked });
+    await storage.setInjectorEnabled(masterToggle.checked);
+});
+
+themeSelect.addEventListener('change', async () => {
+    await storage.setThemePreference(themeSelect.value);
 });
 
 openSettingsBtn.addEventListener('click', () => {
@@ -227,9 +226,10 @@ openSettingsBtn.addEventListener('click', () => {
 });
 
 injectBtn.addEventListener('click', async () => {
-    if (!masterToggle.checked) return;
+    const enabled = await storage.isInjectorEnabled();
+    if (!enabled) return;
 
-    const session = await getSession();
+    const session = await storage.getUiSession();
     const lookupTarget = (session.mode === 'active_tab' && session.scope === 'domain') ? currentTabDomain : (session.target || 'global');
 
     if (!lookupTarget) {
@@ -237,16 +237,14 @@ injectBtn.addEventListener('click', async () => {
         return;
     }
 
-    const settings = {
-        [`css_${lookupTarget}`]: cssInput.value,
-        [`gtag_${lookupTarget}`]: toggleGtag.checked,
-        [`referrer_${lookupTarget}`]: toggleReferrer.checked
-    };
+    await storage.setDomainSettings(lookupTarget, {
+        css: cssInput.value,
+        gtag: toggleGtag.checked,
+        referrer: toggleReferrer.checked
+    });
 
-    await chrome.storage.local.set(settings);
     showStatus('Settings Saved & Applied!');
 
-    // Trigger injection
     chrome.runtime.sendMessage({ 
         action: 'insertCss', 
         scope: session.scope,
