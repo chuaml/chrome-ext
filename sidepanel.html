@@ -419,7 +419,7 @@
 
     <div class="main-content">
         <div class="card">
-            <div class="card-title">Injection Editor</div>
+            <div class="card-title">Scope & Settings</div>
             <div class="scope-selector">
                 <label>
                     <input type="radio" name="scope" value="domain" checked id="scope-domain"> Domain
@@ -429,10 +429,16 @@
                 </label>
             </div>
             <div id="domain-display">Detecting domain...</div>
+
+            <div id="tag-container" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px;">
+                <!-- Tags here -->
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <input type="text" id="add-tag-input" placeholder="Add tag..." style="flex: 1; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 0.75rem;">
+                <button id="add-tag-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem;">Add</button>
+            </div>
             
-            <textarea id="css-input" placeholder="/* CSS Code here */"></textarea>
-            
-            <div class="privacy-settings">
+            <div class="privacy-settings" style="margin-top: 0; padding-top: 0; border-top: none;">
                 <label>
                     <div class="switch">
                         <input type="checkbox" id="toggle-gtag">
@@ -448,11 +454,30 @@
                     <span>Stealth Referrer Policy</span>
                 </label>
             </div>
+        </div>
 
-            <div class="actions">
-                <button id="inject-btn">Save & Inject</button>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="card-title" style="margin-bottom: 0;">CSS Snippets</div>
+                <button id="add-snippet-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem;">+ New</button>
             </div>
-            <div id="status" class="status"></div>
+            
+            <div id="snippet-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                <!-- Snippet items here -->
+            </div>
+
+            <div id="editor-container" style="display: none;">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" id="snippet-name" placeholder="Snippet Name" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 0.85rem;">
+                    <button id="save-snippet-btn" style="width: auto; padding: 6px 12px; font-size: 0.8rem;">Save</button>
+                </div>
+                <textarea id="css-input" placeholder="/* CSS Code here */"></textarea>
+                <div id="status" class="status"></div>
+            </div>
+            
+            <div id="no-snippets-msg" style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 20px 0;">
+                No snippets for this scope.
+            </div>
         </div>
 
         <div class="card">

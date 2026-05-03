@@ -8,9 +8,10 @@ chrome.runtime.onInstalled.addListener(function () {
 		.catch((error) => console.error(error));
 });
 
-// Automatically inject CSS when a tab is updated
+// Automatically inject CSS when a tab is loading (as early as possible to prevent CLS)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-	if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
+	// Status 'loading' is much earlier than 'complete'
+	if (changeInfo.status === 'loading' && tab.url && tab.url.startsWith('http')) {
 		injectCssForTab(tabId, tab.url);
 	}
 });
@@ -23,22 +24,26 @@ async function injectCssForTab(tabId, urlString) {
 		const url = new URL(urlString);
 		const domain = url.hostname;
 
-		// Check for global CSS
+		// Check for global CSS (now using snippets)
 		const globalSettings = await storage.getDomainSettings('global');
-		if (globalSettings.css) {
-			await chrome.scripting.insertCSS({
-				target: { tabId },
-				css: globalSettings.css
-			}).catch(() => { });
+		for (const snippet of globalSettings.snippets) {
+			if (snippet.enabled && snippet.code) {
+				await chrome.scripting.insertCSS({
+					target: { tabId },
+					css: snippet.code
+				}).catch(() => { });
+			}
 		}
 
-		// Check for domain-specific CSS
+		// Check for domain-specific CSS (now using snippets)
 		const domainSettings = await storage.getDomainSettings(domain);
-		if (domainSettings.css) {
-			await chrome.scripting.insertCSS({
-				target: { tabId },
-				css: domainSettings.css
-			}).catch(() => { });
+		for (const snippet of domainSettings.snippets) {
+			if (snippet.enabled && snippet.code) {
+				await chrome.scripting.insertCSS({
+					target: { tabId },
+					css: snippet.code
+				}).catch(() => { });
+			}
 		}
 	} catch (e) {
 		console.error('Auto-injection failed:', e);
@@ -79,23 +84,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				return;
 			}
 
-			const lookupTarget = (message.scope === 'global') ? 'global' : message.domain;
-			const settings = await storage.getDomainSettings(lookupTarget);
-
-			if (!settings.css) {
-				console.warn(`No CSS code found for target ${lookupTarget}`);
+			// SUPPORT FOR PREVIEW (Direct CSS code passed in message)
+			if (message.previewCode) {
+				const injectionPromises = tabs.map(tab => {
+					if (!tab.id) return Promise.resolve();
+					return chrome.scripting.insertCSS({
+						target: { tabId: tab.id },
+						css: message.previewCode
+					}).catch(err => console.warn(`Failed to preview into tab ${tab.id}:`, err));
+				});
+				await Promise.all(injectionPromises);
 				return;
 			}
 
-			console.log(`Injecting CSS into ${tabs.length} tab(s) using scope ${message.scope}`);
+			const lookupTarget = (message.scope === 'global') ? 'global' : message.domain;
+			const settings = await storage.getDomainSettings(lookupTarget);
 
-			const injectionPromises = tabs.map(tab => {
-				if (!tab.id) return Promise.resolve();
-				return chrome.scripting.insertCSS({
-					target: { tabId: tab.id },
-					css: settings.css
-				}).catch(err => console.warn(`Failed to inject into tab ${tab.id}:`, err));
-			});
+			const activeSnippets = settings.snippets.filter(s => s.enabled && s.code);
+			if (activeSnippets.length === 0) {
+				console.warn(`No active snippets found for target ${lookupTarget}`);
+				return;
+			}
+
+			console.log(`Injecting ${activeSnippets.length} snippets into ${tabs.length} tab(s)`);
+
+			const injectionPromises = [];
+			for (const tab of tabs) {
+				if (!tab.id) continue;
+				for (const snippet of activeSnippets) {
+					injectionPromises.push(
+						chrome.scripting.insertCSS({
+							target: { tabId: tab.id },
+							css: snippet.code
+						}).catch(err => console.warn(`Failed to inject snippet into tab ${tab.id}:`, err))
+					);
+				}
+			}
 
 			await Promise.all(injectionPromises);
 

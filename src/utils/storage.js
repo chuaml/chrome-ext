@@ -6,7 +6,8 @@ const STORAGE_KEYS = {
     UI_SESSION: 'ui_session',
     INJECTOR_ENABLED: 'injector_enabled',
     THEME_PREFERENCE: 'theme_preference', // 'system' | 'light' | 'dark'
-    CSS_PREFIX: 'css_',
+    SNIPPETS_PREFIX: 'snippets_', // Array of { id, name, code, enabled }
+    TAGS_PREFIX: 'tags_', // Array of strings
     GTAG_PREFIX: 'gtag_',
     REFERRER_PREFIX: 'referrer_'
 };
@@ -49,7 +50,8 @@ export const storage = {
         return res[STORAGE_KEYS.UI_SESSION] || {
             scope: 'domain',
             mode: 'active_tab',
-            target: ''
+            target: '',
+            activeSnippetId: null
         };
     },
 
@@ -76,25 +78,61 @@ export const storage = {
     },
 
     /**
-     * Get domain-specific settings
+     * Get tags for a domain
+     */
+    async getDomainTags(domain) {
+        const key = `${STORAGE_KEYS.TAGS_PREFIX}${domain}`;
+        const res = await chrome.storage.local.get([key]);
+        return res[key] || [];
+    },
+
+    async setDomainTags(domain, tags) {
+        await this.set({ [`${STORAGE_KEYS.TAGS_PREFIX}${domain}`]: tags });
+    },
+
+    /**
+     * Get domain-specific settings including snippets and tags
      */
     async getDomainSettings(domain) {
         const keys = [
-            `${STORAGE_KEYS.CSS_PREFIX}${domain}`,
+            `${STORAGE_KEYS.SNIPPETS_PREFIX}${domain}`,
+            `${STORAGE_KEYS.TAGS_PREFIX}${domain}`,
             `${STORAGE_KEYS.GTAG_PREFIX}${domain}`,
-            `${STORAGE_KEYS.REFERRER_PREFIX}${domain}`
+            `${STORAGE_KEYS.REFERRER_PREFIX}${domain}`,
+            `css_${domain}` // For migration
         ];
         const res = await chrome.storage.local.get(keys);
+        
+        let snippets = res[`${STORAGE_KEYS.SNIPPETS_PREFIX}${domain}`] || [];
+        const tags = res[`${STORAGE_KEYS.TAGS_PREFIX}${domain}`] || [];
+        
+        // Simple Migration: If old css_domain exists, convert to first snippet
+        const oldCss = res[`css_${domain}`];
+        if (oldCss && snippets.length === 0) {
+            snippets = [{
+                id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+                name: 'Default Snippet',
+                code: oldCss,
+                enabled: true
+            }];
+            await this.setDomainSnippets(domain, snippets);
+            await this.remove(`css_${domain}`);
+        }
+
         return {
-            css: res[`${STORAGE_KEYS.CSS_PREFIX}${domain}`] || '',
+            snippets: snippets,
+            tags: tags,
             gtag: !!res[`${STORAGE_KEYS.GTAG_PREFIX}${domain}`],
             referrer: !!res[`${STORAGE_KEYS.REFERRER_PREFIX}${domain}`]
         };
     },
 
-    async setDomainSettings(domain, { css, gtag, referrer }) {
+    async setDomainSnippets(domain, snippets) {
+        await this.set({ [`${STORAGE_KEYS.SNIPPETS_PREFIX}${domain}`]: snippets });
+    },
+
+    async setDomainSettings(domain, { gtag, referrer }) {
         const data = {};
-        if (css !== undefined) data[`${STORAGE_KEYS.CSS_PREFIX}${domain}`] = css;
         if (gtag !== undefined) data[`${STORAGE_KEYS.GTAG_PREFIX}${domain}`] = gtag;
         if (referrer !== undefined) data[`${STORAGE_KEYS.REFERRER_PREFIX}${domain}`] = referrer;
         await this.set(data);

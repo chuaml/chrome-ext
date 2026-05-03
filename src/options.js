@@ -5,6 +5,7 @@ import { applyTheme, watchThemeChanges } from './utils/theme.js';
 
 const settingsBody = document.getElementById('settings-body');
 const searchInput = document.getElementById('search-input');
+const tagFilter = document.getElementById('tag-filter');
 const themeSelect = document.getElementById('theme-select');
 const btnRefresh = document.getElementById('btn-refresh');
 const btnExport = document.getElementById('btn-export');
@@ -29,6 +30,7 @@ let currentEditingKey = null;
 async function loadSettings() {
     const allStorage = await storage.getAll();
     const filter = searchInput.value.toLowerCase();
+    const tagFilterVal = tagFilter.value.toLowerCase();
     
     settingsBody.innerHTML = '';
     
@@ -36,17 +38,42 @@ async function loadSettings() {
     
     sortedKeys.forEach(key => {
         if (filter && !key.toLowerCase().includes(filter)) return;
-        
+
+        const domain = key.split('_').slice(1).join('_');
+        const tags = domain ? (allStorage[`${storage.KEYS.TAGS_PREFIX}${domain}`] || []) : [];
+
+        // Tag filtering logic
+        if (tagFilterVal && !tags.some(t => t.toLowerCase().includes(tagFilterVal))) return;
+
         const row = document.createElement('tr');
         
         // Key / Domain
         const keyCell = document.createElement('td');
-        keyCell.textContent = key;
+        const keyText = document.createElement('div');
+        keyText.textContent = key;
+        keyText.style.marginBottom = '4px';
+        keyCell.appendChild(keyText);
+
+        if (tags.length > 0) {
+            tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.style.fontSize = '0.65rem';
+                span.style.padding = '2px 6px';
+                span.style.background = 'var(--badge-bg)';
+                span.style.color = 'var(--primary-color)';
+                span.style.borderRadius = '10px';
+                span.style.marginRight = '4px';
+                span.style.fontWeight = '700';
+                span.textContent = tag;
+                keyCell.appendChild(span);
+            });
+        }
         
         // Type
         const typeCell = document.createElement('td');
         let type = 'Other';
-        if (key.startsWith(storage.KEYS.CSS_PREFIX)) type = 'CSS';
+        if (key.startsWith(storage.KEYS.SNIPPETS_PREFIX)) type = 'Snippets';
+        else if (key.startsWith(storage.KEYS.TAGS_PREFIX)) type = 'Tags';
         else if (key.startsWith(storage.KEYS.GTAG_PREFIX)) type = 'GTag';
         else if (key.startsWith(storage.KEYS.REFERRER_PREFIX)) type = 'Referrer';
         else if (key === storage.KEYS.UI_SESSION) type = 'Session';
@@ -56,6 +83,10 @@ async function loadSettings() {
         const badge = document.createElement('span');
         badge.className = 'badge';
         badge.textContent = type;
+        if (type === 'Snippets') {
+            badge.style.background = 'rgba(30, 142, 62, 0.1)';
+            badge.style.color = 'var(--success-color)';
+        }
         typeCell.appendChild(badge);
         
         // Preview
@@ -131,7 +162,7 @@ function openEditModal(key, value) {
 async function saveEdit() {
     let value = editArea.value;
     
-    if (currentEditingKey === storage.KEYS.UI_SESSION || value.trim().startsWith('{') || value.trim().startsWith('[')) {
+    if (currentEditingKey === storage.KEYS.UI_SESSION || currentEditingKey.startsWith(storage.KEYS.SNIPPETS_PREFIX) || currentEditingKey.startsWith(storage.KEYS.TAGS_PREFIX) || value.trim().startsWith('{') || value.trim().startsWith('[')) {
         try {
             value = JSON.parse(value);
         } catch (e) {
@@ -191,6 +222,7 @@ async function importConfig() {
 // Event Listeners
 btnRefresh.addEventListener('click', loadSettings);
 searchInput.addEventListener('input', loadSettings);
+tagFilter.addEventListener('input', loadSettings);
 themeSelect.addEventListener('change', async () => {
     await storage.setThemePreference(themeSelect.value);
 });
