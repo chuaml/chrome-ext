@@ -14,7 +14,8 @@
                 "alefragnani.Bookmarks",
                 "usernamehw.errorlens",
                 "dbaeumer.vscode-eslint",
-                "eamodio.gitlens"
+                "eamodio.gitlens",
+                "google.gemini-cli-vscode-ide-companion"
             ]
         }
     },

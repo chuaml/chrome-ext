@@ -10,7 +10,8 @@ services:
   #     - dependencies:/app/node_modules # isloate node_modules/ from host, stay in container volume
 
   dev-container: ## for vscode dev container extension
-    image: mcr.microsoft.com/devcontainers/javascript-node:24
+    # image: mcr.microsoft.com/devcontainers/javascript-node:24
+    image: us-docker.pkg.dev/gemini-code-dev/gemini-cli/sandbox:0.36.0
     working_dir: /app/
     ports:
       - "5173:5173"
