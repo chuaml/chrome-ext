@@ -193,8 +193,8 @@ async function deleteKey(key) {
 }
 
 async function exportConfig() {
-    const allStorage = await storage.getAll();
-    const blob = new Blob([JSON.stringify(allStorage, null, 4)], { type: 'application/json' });
+    const config = await storage.exportConfig();
+    const blob = new Blob([JSON.stringify(config, null, 4)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -207,15 +207,15 @@ async function importConfig() {
     try {
         const config = JSON.parse(importArea.value);
         if (confirm('This will overwrite existing settings. Continue?')) {
-            await storage.clear();
-            await storage.set(config);
+            await storage.importConfig(config);
             importModal.style.display = 'none';
             importArea.value = '';
             loadSettings();
             alert('Import successful!');
         }
     } catch (e) {
-        alert('Invalid JSON configuration.');
+        console.error(e);
+        alert('Invalid JSON configuration or import failed.');
     }
 }
 

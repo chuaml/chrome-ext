@@ -2,7 +2,7 @@
 
 This document outlines identified areas for improvement and a phased plan to enhance the extension's architecture, user experience, and robustness.
 
-## 1. Identified Areas for Improvement
+## 1. Identified Areas for Improvement (Completed)
 
 ### A. State Management & Synchronization
 - **Issue**: Current synchronization between the side panel, popup, and background script relies on polling or manual message passing for some states.
@@ -27,20 +27,20 @@ This document outlines identified areas for improvement and a phased plan to enh
 
 ---
 
-## 2. Implementation Plan
+## 2. Implementation Plan (Completed)
 
-### Phase 1: Architectural Foundation (Next Steps)
+### Phase 1: Architectural Foundation (Completed)
 1.  **Centralized Storage Helper**: Create `src/utils/storage.js` to wrap `chrome.storage.local` with type-safe getters/setters and standardized keys.
 2.  **Manual Theme Override**: Update `options.html` and `sidepanel.html` to allow users to force a theme regardless of system settings.
 
-### Phase 2: Enhanced Injection Logic
+### Phase 2: Enhanced Injection Logic (Completed)
 1.  **Debounced Live Preview**: Implement a listener in `sidepanel.js` that injects CSS temporarily while editing.
 2.  **Snippet Management**: Refactor storage schema to support multiple CSS blobs per domain.
 
-### Phase 3: UX & Performance
+### Phase 3: UX & Performance (Completed)
 1.  **Performance Audit**: Ensure that broad CSS injection (Global scope) doesn't cause layout shift (CLS) on heavy sites.
 2.  **Search & Tags**: Add tagging to saved scopes for easier organization in Advanced Settings.
 
-### Phase 4: Quality Assurance
-1.  **Unit Tests**: Implement tests for storage migration and configuration import/export logic.
-2.  **CI/CD**: Add a GitHub Action to run `npm run build` and `npm test` on every PR.
+### Phase 4: Quality Assurance (Completed)
+1.  **Unit Tests**: Implement tests for storage migration and configuration import/export logic. (Done)
+2.  **CI/CD**: Add a GitHub Action to run `npm run build` and `npm test` on every PR. (Done)

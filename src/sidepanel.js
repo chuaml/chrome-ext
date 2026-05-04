@@ -43,6 +43,7 @@ html {
 function debounce(func, wait) {
     return function (...args) {
         clearTimeout(previewTimeout);
+        // eslint-disable-next-line no-invalid-this
         previewTimeout = setTimeout(() => func.apply(this, args), wait);
     };
 }

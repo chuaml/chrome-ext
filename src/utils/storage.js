@@ -136,5 +136,24 @@ export const storage = {
         if (gtag !== undefined) data[`${STORAGE_KEYS.GTAG_PREFIX}${domain}`] = gtag;
         if (referrer !== undefined) data[`${STORAGE_KEYS.REFERRER_PREFIX}${domain}`] = referrer;
         await this.set(data);
+    },
+
+    /**
+     * Export entire configuration as a JSON-serializable object
+     */
+    async exportConfig() {
+        return await this.getAll();
+    },
+
+    /**
+     * Import configuration from a JSON-serializable object
+     * @param {Object} config 
+     */
+    async importConfig(config) {
+        if (!config || typeof config !== 'object') {
+            throw new Error('Invalid configuration format');
+        }
+        await this.clear();
+        await this.set(config);
     }
 };

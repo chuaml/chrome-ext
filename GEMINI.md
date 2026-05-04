@@ -40,6 +40,8 @@ The extension requests the following permissions:
   - This starts Vite in watch mode. The extension will automatically reload in Chrome when changes are detected.
 - **Build for Production:** `npm run build`
   - Outputs the bundled extension to the `dist/` directory.
+- **Linting:** `npm run lint`
+  - Runs ESLint to ensure code quality and adherence to project standards.
 
 ## Testing Strategy
 - **Framework:** [Vitest](https://vitest.dev/)
@@ -48,6 +50,7 @@ The extension requests the following permissions:
     - `npm test`: Run tests once.
     - `npm run test:watch`: Run tests in watch mode.
 - **Conventions:** Place test files in `src/` with `.test.js` or `.spec.js` suffixes.
+- **CI/CD:** Automated tests and builds are performed on every PR and push to `main` via GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Gemini CLI Usage
 - **Context Awareness:** When working on this project, be aware that `@crxjs/vite-plugin` handles the transformation of `manifest.json`. Edits should generally be made to `manifest.json.js` or `manifest.config.js`.
