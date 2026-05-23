@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,61 +21,25 @@
             --success-bg: rgba(30, 142, 62, 0.1);
             --info-bg: rgba(66, 133, 244, 0.08);
             --input-bg: #ffffff;
-            --shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
             --transition: all 0.2s ease;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary-color: #8ab4f8;
-                --primary-hover: #aecbfa;
-                --bg-color: #202124;
-                --card-bg: #292a2d;
-                --text-color: #e8eaed;
-                --text-secondary: #9aa0a6;
-                --border-color: #3c4043;
-                --danger-color: #f28b82;
-                --danger-bg: rgba(242, 139, 130, 0.15);
-                --success-color: #81c995;
-                --success-bg: rgba(129, 201, 149, 0.15);
-                --info-bg: rgba(138, 180, 248, 0.12);
-                --input-bg: #303134;
-                --shadow: 0 1px 2px 0 rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
-            }
-        }
-
-        body[data-theme="light"] {
-            --primary-color: #4285f4;
-            --primary-hover: #357abd;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #202124;
-            --text-secondary: #5f6368;
-            --border-color: #dadce0;
-            --danger-color: #d93025;
-            --danger-bg: rgba(217, 48, 37, 0.1);
-            --success-color: #1e8e3e;
-            --success-bg: rgba(30, 142, 62, 0.1);
-            --info-bg: rgba(66, 133, 244, 0.08);
-            --input-bg: #ffffff;
-            --shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-        }
-
-        body[data-theme="dark"] {
-            --primary-color: #8ab4f8;
-            --primary-hover: #aecbfa;
-            --bg-color: #202124;
-            --card-bg: #292a2d;
-            --text-color: #e8eaed;
-            --text-secondary: #9aa0a6;
-            --border-color: #3c4043;
-            --danger-color: #f28b82;
-            --danger-bg: rgba(242, 139, 130, 0.15);
-            --success-color: #81c995;
-            --success-bg: rgba(129, 201, 149, 0.15);
-            --info-bg: rgba(138, 180, 248, 0.12);
-            --input-bg: #303134;
-            --shadow: 0 1px 2px 0 rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+        .dark {
+            --primary-color: #9ec2ff;
+            --primary-hover: #c2d9ff;
+            --bg-color: #242424;
+            --card-bg: #1b1b1b;
+            --text-color: #ffffff;
+            --text-secondary: #e0e0e0;
+            --border-color: #aaa;
+            --danger-color: #ff8a80;
+            --danger-bg: rgba(255, 138, 128, 0.15);
+            --success-color: #b9f6ca;
+            --success-bg: rgba(185, 246, 202, 0.15);
+            --info-bg: rgba(158, 194, 255, 0.12);
+            --input-bg: #000000;
+            --shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         body {
@@ -97,7 +62,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             z-index: 10;
         }
 
@@ -189,7 +154,7 @@
         #domain-display {
             font-size: 0.8rem;
             padding: 10px 14px;
-            background: rgba(66, 133, 244, 0.08);
+            background: var(--info-bg);
             border-radius: 8px;
             color: var(--primary-color);
             margin-bottom: 12px;
@@ -220,9 +185,6 @@
         }
 
         .privacy-settings {
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -238,10 +200,6 @@
             color: var(--text-color);
         }
 
-        .actions {
-            margin-top: 16px;
-        }
-
         button {
             width: 100%;
             padding: 12px;
@@ -253,13 +211,13 @@
             font-weight: 600;
             font-size: 0.95rem;
             transition: var(--transition);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
             background-color: var(--primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         button:active {
@@ -345,7 +303,7 @@
         }
 
         .delete-scope:hover {
-            background: rgba(217, 48, 37, 0.1);
+            background: var(--danger-bg);
             color: var(--danger-color);
         }
 
@@ -378,8 +336,8 @@
             border-radius: 50%;
         }
 
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(16px); }
+        input:checked+.slider { background-color: var(--primary-color); }
+        input:checked+.slider:before { transform: translateX(16px); }
 
         .toggle-container {
             display: flex;
@@ -394,9 +352,9 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
-
     </style>
 </head>
+
 <body>
     <header>
         <div class="header-left">
@@ -437,7 +395,7 @@
                 <input type="text" id="add-tag-input" placeholder="Add tag..." style="flex: 1; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 0.75rem;">
                 <button id="add-tag-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem;">Add</button>
             </div>
-            
+
             <div class="privacy-settings" style="margin-top: 0; padding-top: 0; border-top: none;">
                 <label>
                     <div class="switch">
@@ -459,9 +417,12 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div class="card-title" style="margin-bottom: 0;">CSS Snippets</div>
-                <button id="add-snippet-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem;">+ New</button>
+                <div style="display: flex; gap: 8px;">
+                    <button id="add-darkmode-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color);">+ Dark Mode</button>
+                    <button id="add-snippet-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem;">+ New</button>
+                </div>
             </div>
-            
+
             <div id="snippet-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
                 <!-- Snippet items here -->
             </div>
@@ -474,7 +435,7 @@
                 <textarea id="css-input" placeholder="/* CSS Code here */"></textarea>
                 <div id="status" class="status"></div>
             </div>
-            
+
             <div id="no-snippets-msg" style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 20px 0;">
                 No snippets for this scope.
             </div>
@@ -490,5 +451,5 @@
 
     <script type="module" src="/src/sidepanel.js"></script>
 </body>
-</html>
 
+</html>

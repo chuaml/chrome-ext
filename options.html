@@ -6,6 +6,7 @@
     <title>Advanced Settings - CSS Injector</title>
     <style>
         :root {
+            color-scheme: light dark;
             --primary-color: #4285f4;
             --primary-hover: #357abd;
             --bg-color: #f8f9fa;
@@ -14,58 +15,32 @@
             --text-secondary: #5f6368;
             --border-color: #dadce0;
             --danger-color: #d93025;
+            --danger-bg: rgba(217, 48, 37, 0.1);
             --success-color: #1e8e3e;
+            --success-bg: rgba(30, 142, 62, 0.1);
+            --info-bg: rgba(66, 133, 244, 0.08);
             --input-bg: #ffffff;
             --table-header: #f1f3f4;
-            --shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
             --transition: all 0.2s ease;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary-color: #8ab4f8;
-                --primary-hover: #aecbfa;
-                --bg-color: #202124;
-                --card-bg: #292a2d;
-                --text-color: #e8eaed;
-                --text-secondary: #9aa0a6;
-                --border-color: #3c4043;
-                --danger-color: #f28b82;
-                --success-color: #81c995;
-                --input-bg: #303134;
-                --table-header: #3c4043;
-                --shadow: 0 1px 3px 0 rgba(0,0,0,.3), 0 4px 8px 3px rgba(0,0,0,.15);
-            }
-        }
-
-        body[data-theme="light"] {
-            --primary-color: #4285f4;
-            --primary-hover: #357abd;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #202124;
-            --text-secondary: #5f6368;
-            --border-color: #dadce0;
-            --danger-color: #d93025;
-            --success-color: #1e8e3e;
-            --input-bg: #ffffff;
-            --table-header: #f1f3f4;
-            --shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
-        }
-
-        body[data-theme="dark"] {
-            --primary-color: #8ab4f8;
-            --primary-hover: #aecbfa;
-            --bg-color: #202124;
-            --card-bg: #292a2d;
-            --text-color: #e8eaed;
-            --text-secondary: #9aa0a6;
-            --border-color: #3c4043;
-            --danger-color: #f28b82;
-            --success-color: #81c995;
-            --input-bg: #303134;
-            --table-header: #3c4043;
-            --shadow: 0 1px 3px 0 rgba(0,0,0,.3), 0 4px 8px 3px rgba(0,0,0,.15);
+        .dark {
+            --primary-color: #9ec2ff;
+            --primary-hover: #c2d9ff;
+            --bg-color: #242424;
+            --card-bg: #1b1b1b;
+            --text-color: #ffffff;
+            --text-secondary: #e0e0e0;
+            --border-color: #aaa;
+            --danger-color: #ff8a80;
+            --danger-bg: rgba(255, 138, 128, 0.15);
+            --success-color: #b9f6ca;
+            --success-bg: rgba(185, 246, 202, 0.15);
+            --info-bg: rgba(158, 194, 255, 0.12);
+            --input-bg: #000000;
+            --table-header: #222222;
+            --shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         body {
@@ -154,7 +129,7 @@
         }
 
         tr:last-child td { border-bottom: none; }
-        tr:hover { background: rgba(0,0,0,0.02); }
+        tr:hover { background: rgba(128,128,128,0.05); }
 
         .actions-cell {
             display: flex;
@@ -194,7 +169,7 @@
         }
 
         button.danger:hover { 
-            background: rgba(217, 48, 37, 0.1);
+            background: var(--danger-bg);
             border-color: var(--danger-color);
         }
 
@@ -267,17 +242,6 @@
             font-size: 0.9rem;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            background: var(--badge-bg);
-            color: var(--primary-color);
-            text-transform: uppercase;
-        }
-
         pre {
             margin: 0;
             font-size: 0.8rem;
@@ -308,10 +272,6 @@
             text-transform: uppercase;
             font-weight: 600;
             margin-bottom: 4px;
-        }
-
-        .state-value {
-            font-weight: 500;
         }
 
         /* Scrollbar styling */

@@ -8,6 +8,7 @@ const cssInput = document.getElementById('css-input');
 const snippetNameInput = document.getElementById('snippet-name');
 const saveSnippetBtn = document.getElementById('save-snippet-btn');
 const addSnippetBtn = document.getElementById('add-snippet-btn');
+const addDarkmodeBtn = document.getElementById('add-darkmode-btn');
 const snippetList = document.getElementById('snippet-list');
 const editorContainer = document.getElementById('editor-container');
 const noSnippetsMsg = document.getElementById('no-snippets-msg');
@@ -276,6 +277,38 @@ async function addSnippet() {
     updateUI();
 }
 
+async function addDarkModeSnippet() {
+    const session = await storage.getUiSession();
+    const domain = (session.mode === 'active_tab' && session.scope === 'domain') ? currentTabDomain : (session.target || 'global');
+    
+    if (!domain) return;
+
+    const settings = await storage.getDomainSettings(domain);
+    const newSnippet = {
+        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+        name: 'Dark Mode Template',
+        code: `html {
+    filter: invert(.9) hue-rotate(180deg) saturate(1.5) brightness(1.1);
+    background-color: #ddd;
+}
+
+img[src],
+video[src],
+[class*="img"],
+[class*="image"] {
+    filter: invert(1) hue-rotate(180deg);
+}`,
+        enabled: true
+    };
+
+    settings.snippets.push(newSnippet);
+    await storage.setDomainSnippets(domain, settings.snippets);
+    
+    session.activeSnippetId = newSnippet.id;
+    await storage.setUiSession(session);
+    updateUI();
+}
+
 async function selectSnippet(id) {
     const session = await storage.getUiSession();
     session.activeSnippetId = id;
@@ -390,7 +423,7 @@ async function updateUI() {
 
     const enabled = await storage.isInjectorEnabled();
     masterToggle.checked = enabled;
-    [cssInput, addSnippetBtn, snippetNameInput, saveSnippetBtn, scopeDomain, scopeGlobal, toggleGtag, toggleReferrer, addTagInput, addTagBtn].forEach(el => el.disabled = !enabled);
+    [cssInput, addSnippetBtn, addDarkmodeBtn, snippetNameInput, saveSnippetBtn, scopeDomain, scopeGlobal, toggleGtag, toggleReferrer, addTagInput, addTagBtn].forEach(el => el.disabled = !enabled);
     
     const theme = await storage.getThemePreference();
     themeSelect.value = theme;
@@ -477,6 +510,7 @@ addTagInput.addEventListener('keypress', (e) => {
 });
 
 addSnippetBtn.addEventListener('click', addSnippet);
+addDarkmodeBtn.addEventListener('click', addDarkModeSnippet);
 saveSnippetBtn.addEventListener('click', saveCurrentSnippet);
 cssInput.addEventListener('input', livePreview);
 
